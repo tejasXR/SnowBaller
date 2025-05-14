@@ -1,3 +1,4 @@
+using System;
 using GorillaLocomotion;
 using UnityEngine;
 
@@ -33,7 +34,8 @@ namespace Snowballer
         private Vector3 _lastHeadPosition;
         private Rigidbody _playerRigidBody;
 
-        [Header("Locomotion Variables")]
+        [Header("Locomotion Variables")] 
+        [SerializeField] private float movementAmplifier = 50F;
         [SerializeField] private LayerMask locomotionEnabledLayers;
         [SerializeField] private int velocityHistorySize = 8;
         [SerializeField] private float maxArmLength = 1.5f;
@@ -44,6 +46,10 @@ namespace Snowballer
         [SerializeField] private float minimumRaycastDistance = 0.05f;
         [SerializeField] private float defaultSlideFactor = 0.03f;
         [SerializeField] private float defaultPrecision = 0.995f;
+
+        private const float GravityForce = 9.8F;
+        private const float GravityMultiplier = 2F;
+        private const float MinimumMovementVelocityThreshold = .1F;
 
         private Vector3[] _velocityHistory;
         private int _velocityIndex = 0;
@@ -88,7 +94,9 @@ namespace Snowballer
                 return PositionWithOffset(handTransform, handOffset);
             }
 
-            return headCollider.transform.position + (PositionWithOffset(handTransform, handOffset) - headCollider.transform.position).normalized * maxArmLength;
+            return headCollider.transform.position 
+                   + (PositionWithOffset(handTransform, handOffset) 
+                      - headCollider.transform.position).normalized * maxArmLength;
         }
 
         /*private Vector3 CurrentLeftHandPosition()
@@ -122,6 +130,49 @@ namespace Snowballer
 
         private void Update()
         {
+            RotateBodyCollider();
+
+            Vector3 leftMovementProjection = Vector3.zero;
+            Vector3 rightMovementProjection = Vector3.zero;
+            
+            var leftHandPosition = CurrentHandPosition(OVRInput.Handedness.LeftHanded);
+            var rightHandPosition = CurrentHandPosition(OVRInput.Handedness.RightHanded);
+            var gravityForce = Vector3.down * (GravityForce * GravityMultiplier * Time.deltaTime * Time.deltaTime);
+
+            var leftMovementVector = _lastLeftHandPosition - leftHandPosition;
+            var leftMovementDirection = GetMovementAlongSurface(leftHandPosition, minimumRaycastDistance * defaultPrecision, leftMovementVector);
+            if (leftMovementDirection.HasValue)
+            {
+                var direction = leftMovementDirection.Value;
+                direction.y = 0;
+
+                leftMovementProjection = 
+                    Vector3.ProjectOnPlane(direction, Vector3.up);
+            }
+            
+            
+            var rightMovementVector = _lastRightHandPosition - rightHandPosition;
+            var rightMovementDirection = GetMovementAlongSurface(rightHandPosition, minimumRaycastDistance * defaultPrecision, rightMovementVector);
+            if (rightMovementDirection.HasValue)
+            {
+                var direction = rightMovementDirection.Value;
+                direction.y = 0;
+
+                rightMovementProjection = 
+                    Vector3.ProjectOnPlane(direction, Vector3.up);
+            }
+            
+            Move(leftMovementProjection + rightMovementProjection /*+ gravityForce*/);
+
+            _lastLeftHandPosition = leftHandPosition;
+            _lastRightHandPosition = rightHandPosition;
+            
+            leftHandFollower.transform.position = _lastLeftHandPosition;
+            rightHandFollower.transform.position = _lastRightHandPosition;
+        }
+
+        /*private void Update()
+        {
             bool leftHandColliding = false;
             bool rightHandColliding = false;
             Vector3 finalPosition;
@@ -134,13 +185,16 @@ namespace Snowballer
             var leftHandPosition = CurrentHandPosition(OVRInput.Handedness.LeftHanded);
             var rightHandPosition = CurrentHandPosition(OVRInput.Handedness.RightHanded);
 
-            // Left Hand
-            Vector3 distanceTraveled = leftHandPosition - _lastLeftHandPosition + Vector3.down * (2f * 9.8f * Time.deltaTime * Time.deltaTime);
+            var gravityForce = Vector3.down * (GravityForce * GravityMultiplier * Time.deltaTime * Time.deltaTime);
 
-            if (IterativeCollisionSphereCast(_lastLeftHandPosition, minimumRaycastDistance, distanceTraveled,
-                    defaultPrecision, out finalPosition, true))
+            // Left Hand
+            Vector3 distanceTraveled = leftHandPosition - _lastLeftHandPosition + gravityForce;
+
+            if (IterativeCollisionSphereCast(_lastLeftHandPosition, minimumRaycastDistance,
+                    distanceTraveled, defaultPrecision, out finalPosition, true))
             {
-                //this lets you stick to the position you touch, as long as you keep touching the surface this will be the zero point for that hand
+                // This lets you stick to the position you touch, as long as you keep touching the
+                // surface this will be the zero point for that hand
                 if (_wasLeftHandTouching)
                 {
                     firstIterationLeftHand = _lastLeftHandPosition - leftHandPosition;
@@ -149,16 +203,17 @@ namespace Snowballer
                 {
                     firstIterationLeftHand = finalPosition - leftHandPosition;
                 }
+                
                 _playerRigidBody.linearVelocity = Vector3.zero;
 
                 leftHandColliding = true;
             }
 
-            // Right hand
-            distanceTraveled = rightHandPosition - _lastRightHandPosition + Vector3.down * (2f * 9.8f * Time.deltaTime * Time.deltaTime);
+            // Right Hand
+            distanceTraveled = rightHandPosition - _lastRightHandPosition + gravityForce;
 
-            if (IterativeCollisionSphereCast(_lastRightHandPosition, minimumRaycastDistance, distanceTraveled,
-                    defaultPrecision, out finalPosition, true))
+            if (IterativeCollisionSphereCast(_lastRightHandPosition, minimumRaycastDistance, 
+                    distanceTraveled, defaultPrecision, out finalPosition, true))
             {
                 if (_wasRightHandTouching)
                 {
@@ -193,8 +248,10 @@ namespace Snowballer
                     defaultPrecision, out finalPosition, false))
             {
                 rigidBodyMovement = finalPosition - _lastHeadPosition;
-                //last check to make sure the head won't phase through geometry
-                if (Physics.Raycast(_lastHeadPosition, headCollider.transform.position - _lastHeadPosition + rigidBodyMovement, out _, (headCollider.transform.position - _lastHeadPosition + rigidBodyMovement).magnitude + headCollider.radius * defaultPrecision * 0.999f, locomotionEnabledLayers.value))
+                
+                // Last check to make sure the head won't phase through geometry
+                if (Physics.Raycast(_lastHeadPosition, headCollider.transform.position - _lastHeadPosition + rigidBodyMovement, out _, 
+                        (headCollider.transform.position - _lastHeadPosition + rigidBodyMovement).magnitude + headCollider.radius * defaultPrecision * 0.999f, locomotionEnabledLayers.value))
                 {
                     rigidBodyMovement = _lastHeadPosition - headCollider.transform.position;
                 }
@@ -207,8 +264,7 @@ namespace Snowballer
 
             _lastHeadPosition = headCollider.transform.position;
 
-            //do final left hand position
-
+            // Do final left hand position
             distanceTraveled = leftHandPosition - _lastLeftHandPosition;
 
             if (IterativeCollisionSphereCast(_lastLeftHandPosition, minimumRaycastDistance, 
@@ -223,8 +279,7 @@ namespace Snowballer
                 _lastLeftHandPosition = leftHandPosition;
             }
 
-            //do final right hand position
-
+            // Do final right hand position
             distanceTraveled = rightHandPosition - _lastRightHandPosition;
 
             if (IterativeCollisionSphereCast(_lastRightHandPosition, minimumRaycastDistance, 
@@ -256,8 +311,7 @@ namespace Snowballer
                 }
             }
 
-            //check to see if left hand is stuck and we should unstick it
-
+            // Check to see if left hand is stuck and we should unstick it
             if (leftHandColliding && (leftHandPosition - _lastLeftHandPosition).magnitude > unStickDistance && 
                 !Physics.SphereCast
                 (
@@ -273,8 +327,7 @@ namespace Snowballer
                 leftHandColliding = false;
             }
 
-            //check to see if right hand is stuck and we should unstick it
-
+            // Check to see if right hand is stuck and we should unstick it
             if (rightHandColliding && (rightHandPosition - _lastRightHandPosition).magnitude > unStickDistance && 
                 !Physics.SphereCast
                 (
@@ -295,7 +348,7 @@ namespace Snowballer
 
             _wasLeftHandTouching = leftHandColliding;
             _wasRightHandTouching = rightHandColliding;
-        }
+        }*/
 
         private bool IterativeCollisionSphereCast
         (
@@ -308,36 +361,73 @@ namespace Snowballer
         )
         {
             // First spherecast from the starting position to the final position
-            if (CollisionsSphereCast(startPosition, sphereRadius * precision, movementVector, precision, out endPosition, out var hitInfo))
+            if (CollisionsSphereCast
+            (
+                startPosition,
+                sphereRadius * precision,
+                movementVector,
+                precision,
+                out endPosition,
+                out var hitInfo
+            ))
             {
                 // If we hit a surface, do a bit of a slide. this makes it so if you grab with two hands you don't stick 100%,
                 // and if you're pushing along a surface while braced with your head, your hand will slide a bit
                 // Take the surface normal that we hit, then along that plane, do a spherecast to a position a small distance
                 // away to account for moving perpendicular to that surface
                 Vector3 firstPosition = endPosition;
-                var gorillaSurface = hitInfo.collider.GetComponent<Surface>();
-                var slipPercentage = gorillaSurface ? gorillaSurface.slipPercentage : (!singleHand ? defaultSlideFactor : 0.001f);
-                var movementToProjectedAboveCollisionPlane = Vector3.ProjectOnPlane(startPosition + movementVector - firstPosition, hitInfo.normal) * slipPercentage;
-                if (CollisionsSphereCast(endPosition, sphereRadius, movementToProjectedAboveCollisionPlane, precision * precision, out endPosition, out hitInfo))
+                // var gorillaSurface = hitInfo.collider.GetComponent<Surface>();
+                // var slipPercentage = gorillaSurface ? gorillaSurface.slipPercentage : (!singleHand ? defaultSlideFactor : 0.001f);
+                var movementToProjectedAboveCollisionPlane = 
+                    Vector3.ProjectOnPlane(startPosition + movementVector - firstPosition, hitInfo.normal);
+                
+                if (CollisionsSphereCast
+                (
+                    endPosition,
+                    sphereRadius,
+                    movementToProjectedAboveCollisionPlane,
+                    precision * precision,
+                    out endPosition,
+                    out hitInfo
+                ))
                 {
-                    //if we hit trying to move perpendicularly, stop there and our end position is the final spot we hit
+                    // If we hit trying to move perpendicularly, stop there and our end position is the final spot we hit
                     return true;
                 }
-                //if not, try to move closer towards the true point to account for the fact that the movement along the normal of the hit could have moved you away from the surface
-
-                if (CollisionsSphereCast(movementToProjectedAboveCollisionPlane + firstPosition, sphereRadius, startPosition + movementVector - (movementToProjectedAboveCollisionPlane + firstPosition), precision * precision * precision, out endPosition, out hitInfo))
+                
+                // If not, try to move closer towards the true point to account for the fact that the movement along the
+                // normal of the hit could have moved you away from the surface
+                if (CollisionsSphereCast
+                (
+                    movementToProjectedAboveCollisionPlane + firstPosition,
+                    sphereRadius,
+                    startPosition + movementVector - (movementToProjectedAboveCollisionPlane + firstPosition),
+                    precision * precision * precision,
+                    out endPosition,
+                    out hitInfo
+                ))
                 {
                     //if we hit, then return the spot we hit
                     return true;
                 }
 
-                //this shouldn't really happe, since this means that the sliding motion got you around some corner or something and let you get to your final point. back off because something strange happened, so just don't do the slide
+                // This shouldn't really happen, since this means that the sliding motion got you around some corner or
+                // something and let you get to your final point. back off because something strange happened, so just don't do the slide
                 endPosition = firstPosition;
                 return true;
             }
-            //as kind of a sanity check, try a smaller spherecast. this accounts for times when the original spherecast was already touching a surface so it didn't trigger correctly
-
-            if (CollisionsSphereCast(startPosition, sphereRadius * precision * 0.66f, movementVector.normalized * (movementVector.magnitude + sphereRadius * precision * 0.34f), precision * 0.66f, out endPosition, out hitInfo))
+            
+            // As kind of a sanity check, try a smaller spherecast. this accounts for times when the original
+            // spherecast was already touching a surface so it didn't trigger correctly
+            if (CollisionsSphereCast
+            (
+                startPosition,
+                sphereRadius * precision * 0.66f,
+                movementVector.normalized * (movementVector.magnitude + sphereRadius * precision * 0.34f),
+                precision * 0.66f,
+                out endPosition,
+                out hitInfo
+            ))
             {
                 endPosition = startPosition;
                 return true;
@@ -347,26 +437,83 @@ namespace Snowballer
             return false;
         }
 
-        private bool CollisionsSphereCast(Vector3 startPosition, float sphereRadius, Vector3 movementVector, float precision, out Vector3 finalPosition, out RaycastHit hitInfo)
+        private Vector3? GetMovementAlongSurface
+        (
+            Vector3 startPosition,
+            float sphereRadius,
+            Vector3 movementVector
+            // float precision,
+            // out Vector3 finalPosition,
+            // out RaycastHit hitInfo
+        )
         {
-            //kind of like a souped up spherecast. includes checks to make sure that the sphere we're using, if it touches a surface, is pushed away the correct distance (the original sphereradius distance). since you might
-            //be pushing into sharp corners, this might not always be valid, so that's what the extra checks are for
+            if (Physics.CheckSphere(startPosition, sphereRadius, locomotionEnabledLayers.value))
+            {
+                return movementVector;
+            }
+          
+            /*{
+                // If we hit, we're trying to move to a position a sphereradius distance from the normal
+                finalPosition = hitInfo.point + hitInfo.normal * sphereRadius;
+            }*/
+
+            return null;
+
+        }
+
+        private bool CollisionsSphereCast
+        (
+            Vector3 startPosition,
+            float sphereRadius,
+            Vector3 movementVector,
+            float precision,
+            out Vector3 finalPosition,
+            out RaycastHit hitInfo
+        )
+        {
+            // kind of like a souped up spherecast. includes checks to make sure that the sphere we're using, if it touches a surface, is pushed away the correct distance (the original sphereradius distance). since you might
+            // be pushing into sharp corners, this might not always be valid, so that's what the extra checks are for
 
             //initial spherecase
-            RaycastHit innerHit;
-            if (Physics.SphereCast(startPosition, sphereRadius * precision, movementVector, out hitInfo, movementVector.magnitude + sphereRadius * (1 - precision), locomotionEnabledLayers.value))
+            if (Physics.SphereCast
+            (
+                startPosition,
+                sphereRadius * precision,
+                movementVector,
+                out hitInfo,
+                movementVector.magnitude + sphereRadius * (1 - precision),
+                locomotionEnabledLayers.value)
+            )
             {
                 //if we hit, we're trying to move to a position a sphereradius distance from the normal
                 finalPosition = hitInfo.point + hitInfo.normal * sphereRadius;
 
-                //check a spherecase from the original position to the intended final position
-                if (Physics.SphereCast(startPosition, sphereRadius * precision * precision, finalPosition - startPosition, out innerHit, (finalPosition - startPosition).magnitude + sphereRadius * (1 - precision * precision), locomotionEnabledLayers.value))
+                // Check a spherecase from the original position to the intended final position
+                if (Physics.SphereCast
+                (
+                    startPosition,
+                    sphereRadius * precision * precision,
+                    finalPosition - startPosition,
+                    out var innerHit,
+                    (finalPosition - startPosition).magnitude + sphereRadius * (1 - precision * precision),
+                    locomotionEnabledLayers.value
+                ))
                 {
-                    finalPosition = startPosition + (finalPosition - startPosition).normalized * Mathf.Max(0, hitInfo.distance - sphereRadius * (1f - precision * precision));
+                    finalPosition = startPosition 
+                                    + (finalPosition - startPosition).normalized 
+                                    * Mathf.Max(0, hitInfo.distance - sphereRadius * (1f - precision * precision));
+                    
                     hitInfo = innerHit;
                 }
-                //bonus raycast check to make sure that something odd didn't happen with the spherecast. helps prevent clipping through geometry
-                else if (Physics.Raycast(startPosition, finalPosition - startPosition, out innerHit, (finalPosition - startPosition).magnitude + sphereRadius * precision * precision * 0.999f, locomotionEnabledLayers.value))
+                // Bonus raycast check to make sure that something odd didn't happen with the spherecast. helps prevent clipping through geometry
+                else if (Physics.Raycast
+                (
+                    startPosition,
+                    finalPosition - startPosition,
+                    out innerHit,
+                    (finalPosition - startPosition).magnitude + sphereRadius * precision * precision * 0.999f,
+                    locomotionEnabledLayers.value
+                ))
                 {
                     finalPosition = startPosition;
                     hitInfo = innerHit;
@@ -374,9 +521,16 @@ namespace Snowballer
                 }
                 return true;
             }
-            //anti-clipping through geometry check
-
-            if (Physics.Raycast(startPosition, movementVector, out hitInfo, movementVector.magnitude + sphereRadius * precision * 0.999f, locomotionEnabledLayers.value))
+            
+            // Anti-clipping through geometry check
+            if (Physics.Raycast
+            (
+                startPosition,
+                movementVector,
+                out hitInfo,
+                movementVector.magnitude + sphereRadius * precision * 0.999f,
+                locomotionEnabledLayers.value
+            ))
             {
                 finalPosition = startPosition;
                 return true;
@@ -386,7 +540,7 @@ namespace Snowballer
             return false;
         }
 
-        public bool IsHandTouching(bool forLeftHand)
+        /*public bool IsHandTouching(bool forLeftHand)
         {
             if (forLeftHand)
             {
@@ -396,8 +550,13 @@ namespace Snowballer
             {
                 return _wasRightHandTouching;
             }
-        }
+        }*/
 
+        public bool IsOnGround()
+        {
+            return true;
+        }
+        
         public void Turn(float degrees)
         {
             transform.RotateAround(headCollider.transform.position, transform.up, degrees);
@@ -406,6 +565,17 @@ namespace Snowballer
             {
                 _velocityHistory[i] = Quaternion.Euler(0, degrees, 0) * _velocityHistory[i];
             }
+        }
+
+        private void SetVelocity(Vector3 velocityVector)
+        {
+            _playerRigidBody.linearVelocity = velocityVector;
+        }
+
+        private void Move(Vector3 moveVector)
+        {
+            var force = moveVector * movementAmplifier;
+            _playerRigidBody.AddRelativeForce(force, ForceMode.Acceleration);
         }
 
         private void StoreVelocities()
@@ -423,6 +593,4 @@ namespace Snowballer
             bodyCollider.transform.eulerAngles = new Vector3(0, headCollider.transform.eulerAngles.y, 0);
         }
     }
-
 }
-
