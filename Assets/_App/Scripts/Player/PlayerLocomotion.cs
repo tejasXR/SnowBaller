@@ -28,6 +28,8 @@ namespace Snowballer
         [Header("Offsets")]
         [SerializeField] private Vector3 rightHandOffset;
         [SerializeField] private Vector3 leftHandOffset;
+
+        private Vector3 LinearVelocity => _playerRigidBody.linearVelocity;
         
         private Vector3 _lastLeftHandPosition;
         private Vector3 _lastRightHandPosition;
@@ -36,6 +38,12 @@ namespace Snowballer
 
         [Header("Locomotion Variables")] 
         [SerializeField] private float movementAmplifier = 50F;
+        [SerializeField] [Range(0,1)] private float handDragAmplifier = .1F;
+        [SerializeField] private float jumpDirectionAmplifier = 30F;
+        [SerializeField] private float minimumMovementVelocityThreshold = .3F;
+        [SerializeField] private float minimumJumpVelocityThreshold = .3F;
+        [SerializeField] private float maximumJumpVelocity = 5F;
+
         [SerializeField] private LayerMask locomotionEnabledLayers;
         [SerializeField] private int velocityHistorySize = 8;
         [SerializeField] private float maxArmLength = 1.5f;
@@ -49,7 +57,7 @@ namespace Snowballer
 
         private const float GravityForce = 9.8F;
         private const float GravityMultiplier = 2F;
-        private const float MinimumMovementVelocityThreshold = .1F;
+        // private const float MinimumMovementVelocityThreshold = .3F;
 
         private Vector3[] _velocityHistory;
         private int _velocityIndex = 0;
@@ -59,6 +67,9 @@ namespace Snowballer
         private Vector3 _lastPosition;
         private bool _wasLeftHandTouching;
         private bool _wasRightHandTouching;
+
+        private bool _rightHandContact;
+        private bool _leftHandContact;
 
         private void Awake()
         {
@@ -140,29 +151,40 @@ namespace Snowballer
             var gravityForce = Vector3.down * (GravityForce * GravityMultiplier * Time.deltaTime * Time.deltaTime);
 
             var leftMovementVector = _lastLeftHandPosition - leftHandPosition;
-            var leftMovementDirection = GetMovementAlongSurface(leftHandPosition, minimumRaycastDistance * defaultPrecision, leftMovementVector);
+            var leftMovementDirection = GetMovementAlongSurface(leftHandPosition, minimumRaycastDistance * defaultPrecision, leftMovementVector, OVRInput.Handedness.LeftHanded);
             if (leftMovementDirection.HasValue)
             {
                 var direction = leftMovementDirection.Value;
-                direction.y = 0;
-
+                
                 leftMovementProjection = 
-                    Vector3.ProjectOnPlane(direction, Vector3.up);
+                    Vector3.ProjectOnPlane(direction * movementAmplifier, Vector3.up);
+
+                // Jump force
+                /*if (direction.y > minimumJumpVelocityThreshold)
+                {
+                    var jumpForce = Mathf.Clamp(direction.y, -maximumJumpVelocity, 0);
+                    leftMovementProjection +=  new Vector3(0, jumpForce * jumpDirectionAmplifier, 0);
+                }*/
             }
             
-            
             var rightMovementVector = _lastRightHandPosition - rightHandPosition;
-            var rightMovementDirection = GetMovementAlongSurface(rightHandPosition, minimumRaycastDistance * defaultPrecision, rightMovementVector);
+            var rightMovementDirection = GetMovementAlongSurface(rightHandPosition, minimumRaycastDistance * defaultPrecision, rightMovementVector, OVRInput.Handedness.RightHanded);
             if (rightMovementDirection.HasValue)
             {
                 var direction = rightMovementDirection.Value;
-                direction.y = 0;
 
                 rightMovementProjection = 
-                    Vector3.ProjectOnPlane(direction, Vector3.up);
+                    Vector3.ProjectOnPlane(direction * movementAmplifier, Vector3.up);
+                
+                // Jump force
+                /*if (direction.y > minimumJumpVelocityThreshold)
+                {
+                    var jumpForce = Mathf.Clamp(direction.y, -maximumJumpVelocity, 0);
+                    rightMovementProjection +=  new Vector3(0, jumpForce * jumpDirectionAmplifier, 0);
+                }*/
             }
             
-            Move(leftMovementProjection + rightMovementProjection /*+ gravityForce*/);
+            Move(leftMovementProjection + rightMovementProjection/* * movementAmplifier *//*+ gravityForce*/);
 
             _lastLeftHandPosition = leftHandPosition;
             _lastRightHandPosition = rightHandPosition;
@@ -441,24 +463,111 @@ namespace Snowballer
         (
             Vector3 startPosition,
             float sphereRadius,
-            Vector3 movementVector
-            // float precision,
-            // out Vector3 finalPosition,
-            // out RaycastHit hitInfo
+            Vector3 movementVector,
+            OVRInput.Handedness handedness
         )
         {
+            // If we are touching the ground
             if (Physics.CheckSphere(startPosition, sphereRadius, locomotionEnabledLayers.value))
             {
+                switch (handedness)
+                {
+                    case OVRInput.Handedness.LeftHanded:
+                        _leftHandContact = true;
+                        break;
+                    case OVRInput.Handedness.RightHanded:
+                        _rightHandContact = true;
+                        break;
+                }
+                
+                // Increase speed
+                if (movementVector.magnitude > minimumMovementVelocityThreshold)
+                {
+                    // Flip our Y movement vector so we can jump
+                    movementVector.y = -movementVector.y;
+                    return movementVector;
+                }
+
+                // Decrease speed
+                if (LinearVelocity.magnitude > 0)
+                {
+                    return -LinearVelocity * handDragAmplifier;
+                }
+            }
+
+            if (_leftHandContact)
+            {
+                _leftHandContact = false;
                 return movementVector;
             }
-          
-            /*{
-                // If we hit, we're trying to move to a position a sphereradius distance from the normal
-                finalPosition = hitInfo.point + hitInfo.normal * sphereRadius;
+
+            if (_rightHandContact)
+            {
+                _rightHandContact = false;
+                return movementVector;
+            }
+
+            // If our hands are in the air, return no additional movement vectors
+            /*if (handedness == OVRInput.Handedness.LeftHanded)
+            {
+                if (!Physics.CheckSphere(startPosition, sphereRadius, locomotionEnabledLayers.value) && _leftHandContact)
+                {
+                    _leftHandContact = false;
+                    return null;
+                } 
+            }
+            
+            if (handedness == OVRInput.Handedness.RightHanded)
+            {
+                if (!Physics.CheckSphere(startPosition, sphereRadius, locomotionEnabledLayers.value) && _rightHandContact)
+                {
+                    _rightHandContact = false;
+                    return null;
+                } 
+            }
+            
+            // If the player isn't really moving, go ahead and return the movement vector we are moving our hand in
+            if (LinearVelocity.magnitude < MinimumMovementVelocityThreshold)
+            {
+                if ((handedness == OVRInput.Handedness.LeftHanded && _leftHandContact) ||
+                    (handedness == OVRInput.Handedness.RightHanded && _rightHandContact))
+                {
+                    return null;
+                }
+
+                if (movementVector.magnitude < MinimumMovementVelocityThreshold)
+                {
+                    _leftHandContact = false;
+                    _rightHandContact = false;
+                
+                    if (Physics.CheckSphere(startPosition, sphereRadius, locomotionEnabledLayers.value))
+                    {
+                        return movementVector;
+                    }
+                }
+            }
+            else
+            {
+                // If we are moving fast, only register motion when our hands come into contact with the ground 
+                if (handedness == OVRInput.Handedness.LeftHanded && !_leftHandContact)
+                {
+                    if (Physics.CheckSphere(startPosition, sphereRadius, locomotionEnabledLayers.value))
+                    {
+                        _leftHandContact = true;
+                        return movementVector;
+                    }
+                }
+                else if (handedness == OVRInput.Handedness.RightHanded && !_rightHandContact)
+                {
+                    if (Physics.CheckSphere(startPosition, sphereRadius, locomotionEnabledLayers.value))
+                    {
+                        _rightHandContact = true;
+                        return movementVector;
+                    }
+                }
             }*/
 
             return null;
-
         }
 
         private bool CollisionsSphereCast
@@ -574,8 +683,7 @@ namespace Snowballer
 
         private void Move(Vector3 moveVector)
         {
-            var force = moveVector * movementAmplifier;
-            _playerRigidBody.AddRelativeForce(force, ForceMode.Acceleration);
+            _playerRigidBody.AddRelativeForce(moveVector, ForceMode.Acceleration);
         }
 
         private void StoreVelocities()
