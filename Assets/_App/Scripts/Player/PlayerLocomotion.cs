@@ -1,8 +1,6 @@
-using System;
-using GorillaLocomotion;
 using UnityEngine;
 
-namespace Snowballer
+namespace Snowballers
 {
     /// <summary>
     /// Based on the Gorilla Tag Movement system by AnotherAxiom
