@@ -71,19 +71,6 @@ namespace Snowballers
 
         private void Awake()
         {
-            /*if (_instance != null && _instance != this)
-            {
-                Destroy(gameObject);
-            }
-            else
-            {
-                _instance = this;
-            }*/
-            InitializeValues();
-        }
-
-        private void InitializeValues()
-        {
             _playerRigidBody = GetComponent<Rigidbody>();
             
             _velocityHistory = new Vector3[velocityHistorySize];
@@ -192,7 +179,7 @@ namespace Snowballers
                 // }
             }
             
-            Move(leftMovementProjection + rightMovementProjection/*+ gravityForce*/);
+            Move(leftMovementProjection + rightMovementProjection);
 
             _lastLeftHandPosition = leftHandPosition;
             _lastRightHandPosition = rightHandPosition;
@@ -488,8 +475,9 @@ namespace Snowballers
                         break;
                 }
                 
-                // If we are moving our arms enough, increase speed
-                if (movementVector.magnitude > minimumMovementVelocityThreshold)
+                // If we are moving our arms enough OR the player itself is moving slowly, increase speed
+                if (movementVector.magnitude > minimumMovementVelocityThreshold 
+                    || LinearVelocity.magnitude < minimumMovementVelocityThreshold)
                 {
                     return movementVector;
                 }
