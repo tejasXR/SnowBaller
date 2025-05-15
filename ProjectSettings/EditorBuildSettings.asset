@@ -6,8 +6,8 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/_App/Scenes/SampleNetworkBasedGrabbingScene.unity
-    guid: 3651a76d14cb8454c96a9486ec26f729
+    path: Assets/_App/Scenes/Main.unity
+    guid: 71198938a13cf9244aae31ae80cd3960
   m_configObjects:
     com.unity.xr.management.loader_settings: {fileID: 11400000, guid: 9bd7077edc5b871469aa672a34c4ef3a, type: 2}
     com.unity.xr.openxr.settings4: {fileID: 11400000, guid: b275ea07267359d46ac951b75a3557f2, type: 2}
