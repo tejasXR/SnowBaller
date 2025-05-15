@@ -38,7 +38,7 @@ namespace Snowballer
 
         [Header("Locomotion Variables")] 
         [SerializeField] private float movementAmplifier = 50F;
-        [SerializeField] [Range(0,1)] private float handDragAmplifier = .1F;
+        [SerializeField] [Range(0,.01F)] private float handDragAmplifier = .005F;
         [SerializeField] private float jumpDirectionAmplifier = 30F;
         [SerializeField] private float minimumMovementVelocityThreshold = .3F;
         [SerializeField] private float minimumJumpVelocityThreshold = .3F;
@@ -151,40 +151,43 @@ namespace Snowballer
             var gravityForce = Vector3.down * (GravityForce * GravityMultiplier * Time.deltaTime * Time.deltaTime);
 
             var leftMovementVector = _lastLeftHandPosition - leftHandPosition;
-            var leftMovementDirection = GetMovementAlongSurface(leftHandPosition, minimumRaycastDistance * defaultPrecision, leftMovementVector, OVRInput.Handedness.LeftHanded);
+            var leftMovementDirection = GetMovementVectorForHand(leftHandPosition, minimumRaycastDistance * defaultPrecision, leftMovementVector, OVRInput.Handedness.LeftHanded);
             if (leftMovementDirection.HasValue)
             {
                 var direction = leftMovementDirection.Value;
-                
-                leftMovementProjection = 
-                    Vector3.ProjectOnPlane(direction * movementAmplifier, Vector3.up);
+
+                leftMovementProjection = direction * movementAmplifier;
+                leftMovementProjection.y *= jumpMultiplier;
+                // Vector3.ProjectOnPlane(direction * movementAmplifier, Vector3.up);
 
                 // Jump force
                 /*if (direction.y > minimumJumpVelocityThreshold)
                 {
-                    var jumpForce = Mathf.Clamp(direction.y, -maximumJumpVelocity, 0);
+                    var jumpForce = Mathf.Clamp(-direction.y, -maximumJumpVelocity, 0);
                     leftMovementProjection +=  new Vector3(0, jumpForce * jumpDirectionAmplifier, 0);
                 }*/
             }
             
             var rightMovementVector = _lastRightHandPosition - rightHandPosition;
-            var rightMovementDirection = GetMovementAlongSurface(rightHandPosition, minimumRaycastDistance * defaultPrecision, rightMovementVector, OVRInput.Handedness.RightHanded);
+            var rightMovementDirection = GetMovementVectorForHand(rightHandPosition, minimumRaycastDistance * defaultPrecision, rightMovementVector, OVRInput.Handedness.RightHanded);
             if (rightMovementDirection.HasValue)
             {
                 var direction = rightMovementDirection.Value;
 
-                rightMovementProjection = 
-                    Vector3.ProjectOnPlane(direction * movementAmplifier, Vector3.up);
+                rightMovementProjection = direction * movementAmplifier;
+                rightMovementProjection.y *= jumpMultiplier;
+
+                    // Vector3.ProjectOnPlane(direction * movementAmplifier, Vector3.up);
                 
                 // Jump force
-                /*if (direction.y > minimumJumpVelocityThreshold)
-                {
-                    var jumpForce = Mathf.Clamp(direction.y, -maximumJumpVelocity, 0);
-                    rightMovementProjection +=  new Vector3(0, jumpForce * jumpDirectionAmplifier, 0);
-                }*/
+                // if (direction.y > minimumJumpVelocityThreshold)
+                // {
+                    // var jumpForce = Mathf.Clamp(direction.y, minimumJumpVelocityThreshold, maximumJumpVelocity);
+                    // rightMovementProjection +=  new Vector3(0, jumpForce * jumpDirectionAmplifier, 0);
+                // }
             }
             
-            Move(leftMovementProjection + rightMovementProjection/* * movementAmplifier *//*+ gravityForce*/);
+            Move(leftMovementProjection + rightMovementProjection/*+ gravityForce*/);
 
             _lastLeftHandPosition = leftHandPosition;
             _lastRightHandPosition = rightHandPosition;
@@ -459,7 +462,7 @@ namespace Snowballer
             return false;
         }
 
-        private Vector3? GetMovementAlongSurface
+        private Vector3? GetMovementVectorForHand
         (
             Vector3 startPosition,
             float sphereRadius,
@@ -480,32 +483,41 @@ namespace Snowballer
                         break;
                 }
                 
-                // Increase speed
+                // If we are moving our arms enough, increase speed
                 if (movementVector.magnitude > minimumMovementVelocityThreshold)
                 {
-                    // Flip our Y movement vector so we can jump
-                    movementVector.y = -movementVector.y;
                     return movementVector;
                 }
 
-                // Decrease speed
+                // Else, decrease speed
                 if (LinearVelocity.magnitude > 0)
                 {
                     return -LinearVelocity * handDragAmplifier;
                 }
             }
-
-            if (_leftHandContact)
+            else
             {
                 _leftHandContact = false;
-                return movementVector;
+                _rightHandContact = false;
+                return null;
+
+
+                if (_leftHandContact)
+                {
+                    _leftHandContact = false;
+                    return null;
+                    return movementVector;
+                }
+
+                if (_rightHandContact)
+                {
+                    _rightHandContact = false;
+                    return null;
+                    return movementVector;
+                }
             }
 
-            if (_rightHandContact)
-            {
-                _rightHandContact = false;
-                return movementVector;
-            }
+          
 
             // If our hands are in the air, return no additional movement vectors
             /*if (handedness == OVRInput.Handedness.LeftHanded)
@@ -683,7 +695,7 @@ namespace Snowballer
 
         private void Move(Vector3 moveVector)
         {
-            _playerRigidBody.AddRelativeForce(moveVector, ForceMode.Acceleration);
+            _playerRigidBody.AddForce(moveVector, ForceMode.Acceleration);
         }
 
         private void StoreVelocities()
