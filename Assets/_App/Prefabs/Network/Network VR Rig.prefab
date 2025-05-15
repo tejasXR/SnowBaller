@@ -54,7 +54,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 82848160101703958, guid: 477f02bca0b59924aa984e240cb28cc4, type: 3}
       propertyPath: NetworkedBehaviours.Array.size
-      value: 13
+      value: 14
       objectReference: {fileID: 0}
     - target: {fileID: 82848160101703958, guid: 477f02bca0b59924aa984e240cb28cc4, type: 3}
       propertyPath: DestroyWhenStateAuthorityLeaves
@@ -87,25 +87,29 @@ PrefabInstance:
     - target: {fileID: 82848160101703958, guid: 477f02bca0b59924aa984e240cb28cc4, type: 3}
       propertyPath: 'NetworkedBehaviours.Array.data[7]'
       value: 
-      objectReference: {fileID: 4645078150527547820}
+      objectReference: {fileID: 3561326885027469277}
     - target: {fileID: 82848160101703958, guid: 477f02bca0b59924aa984e240cb28cc4, type: 3}
       propertyPath: 'NetworkedBehaviours.Array.data[8]'
       value: 
-      objectReference: {fileID: 4645078150527547822}
+      objectReference: {fileID: 4645078150527547820}
     - target: {fileID: 82848160101703958, guid: 477f02bca0b59924aa984e240cb28cc4, type: 3}
       propertyPath: 'NetworkedBehaviours.Array.data[9]'
       value: 
-      objectReference: {fileID: 7166485006407505927}
+      objectReference: {fileID: 4645078150527547822}
     - target: {fileID: 82848160101703958, guid: 477f02bca0b59924aa984e240cb28cc4, type: 3}
       propertyPath: 'NetworkedBehaviours.Array.data[10]'
       value: 
-      objectReference: {fileID: 4645078150114390198}
+      objectReference: {fileID: 7166485006407505927}
     - target: {fileID: 82848160101703958, guid: 477f02bca0b59924aa984e240cb28cc4, type: 3}
       propertyPath: 'NetworkedBehaviours.Array.data[11]'
       value: 
-      objectReference: {fileID: 4645078150114390184}
+      objectReference: {fileID: 4645078150114390198}
     - target: {fileID: 82848160101703958, guid: 477f02bca0b59924aa984e240cb28cc4, type: 3}
       propertyPath: 'NetworkedBehaviours.Array.data[12]'
+      value: 
+      objectReference: {fileID: 4645078150114390184}
+    - target: {fileID: 82848160101703958, guid: 477f02bca0b59924aa984e240cb28cc4, type: 3}
+      propertyPath: 'NetworkedBehaviours.Array.data[13]'
       value: 
       objectReference: {fileID: 3569800812299808203}
     - target: {fileID: 82848160101703958, guid: 477f02bca0b59924aa984e240cb28cc4, type: 3}
@@ -787,7 +791,33 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 3357212925007658203, guid: 81224343ceee4c64e8c44f57bddbbd1e, type: 3}
       insertIndex: -1
       addedObject: {fileID: 5847787275555764447}
+    - targetCorrespondingSourceObject: {fileID: 7629981665132677350, guid: 81224343ceee4c64e8c44f57bddbbd1e, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3561326885027469277}
   m_SourcePrefab: {fileID: 100100000, guid: 81224343ceee4c64e8c44f57bddbbd1e, type: 3}
+--- !u!1 &845746331788705507 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7629981665132677350, guid: 81224343ceee4c64e8c44f57bddbbd1e, type: 3}
+  m_PrefabInstance: {fileID: 7088545042836551173}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3561326885027469277
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 845746331788705507}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f24cb2556f0be444fa4332f6780197b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  localUserLayer: HiddenFromLocalView
+  remoteUserLayer: Default
+  hideLocalAvatar: 0
+  applyLayerToChildren: 1
+  hideOnAllPlatforms: 1
+  hideOnPlatforms: 
 --- !u!1 &5532854071986129630 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3357212925007658203, guid: 81224343ceee4c64e8c44f57bddbbd1e, type: 3}
@@ -805,7 +835,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f24cb2556f0be444fa4332f6780197b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  localUserLayer: InvisibleForLocalPlayer
+  localUserLayer: HiddenFromLocalView
   remoteUserLayer: Default
   hideLocalAvatar: 0
   applyLayerToChildren: 1
@@ -833,7 +863,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f24cb2556f0be444fa4332f6780197b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  localUserLayer: InvisibleForLocalPlayer
+  localUserLayer: HiddenFromLocalView
   remoteUserLayer: Default
   hideLocalAvatar: 0
   applyLayerToChildren: 1
@@ -856,7 +886,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f24cb2556f0be444fa4332f6780197b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  localUserLayer: InvisibleForLocalPlayer
+  localUserLayer: HiddenFromLocalView
   remoteUserLayer: Default
   hideLocalAvatar: 0
   applyLayerToChildren: 1

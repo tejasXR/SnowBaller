@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 1074147294977028414}
   - component: {fileID: 1074147294977028413}
   - component: {fileID: 1074147294977028412}
-  m_Layer: 8
+  m_Layer: 7
   m_Name: Capsule
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -94,7 +94,7 @@ CapsuleCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1074147294977028410}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: 3bd762b2008f1474d8040a31d149d3e6, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -107,7 +107,7 @@ CapsuleCollider:
   m_Enabled: 1
   serializedVersion: 2
   m_Radius: 0.15
-  m_Height: 0.5
+  m_Height: 1.45
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &1074147295243146612
@@ -256,6 +256,7 @@ GameObject:
   - component: {fileID: 1074147295606221590}
   - component: {fileID: 4723942103716881948}
   - component: {fileID: 1074147295606221672}
+  - component: {fileID: 6155852953071332071}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -293,7 +294,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e12e01263d9b20e4ca157582ca527ef4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  disableMovement: 0
+  disableMovement: 1
+  slopeCalculation: {fileID: 6155852953071332071}
   headCollider: {fileID: 1074147296026158547}
   bodyCollider: {fileID: 1074147294977028412}
   leftHandTransform: {fileID: 1074147295243146613}
@@ -319,6 +321,8 @@ MonoBehaviour:
   minimumRaycastDistance: 0.05
   defaultSlideFactor: 0.03
   defaultPrecision: 0.995
+  GravityForce: 450
+  GravityMultiplier: 0.95
 --- !u!54 &1074147295606221672
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -341,11 +345,27 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 1
+  m_UseGravity: 0
   m_IsKinematic: 0
   m_Interpolate: 1
   m_Constraints: 112
   m_CollisionDetection: 3
+--- !u!114 &6155852953071332071
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1074147295606221589}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1f7f6e5e7532fe045860c1067e4b8c6e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  locomotionLayer:
+    serializedVersion: 2
+    m_Bits: 256
+  playerHead: {fileID: 1074147296026158545}
 --- !u!1 &1074147295958783622
 GameObject:
   m_ObjectHideFlags: 0
@@ -965,7 +985,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &4833518538655166958
 Transform:
   m_ObjectHideFlags: 0
