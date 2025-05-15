@@ -309,7 +309,7 @@ MonoBehaviour:
   maximumJumpVelocity: 55
   locomotionEnabledLayers:
     serializedVersion: 2
-    m_Bits: 1
+    m_Bits: 256
   velocityHistorySize: 8
   maxArmLength: 1.5
   unStickDistance: 1
