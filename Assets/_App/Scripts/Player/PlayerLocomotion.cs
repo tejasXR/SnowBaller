@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace Snowballers
@@ -12,6 +13,7 @@ namespace Snowballers
         // public static Player Instance { get { return _instance; } }
 
         [SerializeField] private bool disableMovement = false;
+        [SerializeField] private SlopeCalculation slopeCalculation;
         
         [Header("Colliders")]
         [SerializeField] private SphereCollider headCollider;
@@ -53,8 +55,8 @@ namespace Snowballers
         [SerializeField] private float defaultSlideFactor = 0.03f;
         [SerializeField] private float defaultPrecision = 0.995f;
 
-        private const float GravityForce = 9.8F;
-        private const float GravityMultiplier = 2F;
+        [SerializeField] private float GravityForce = 1960;
+        [SerializeField] private float GravityMultiplier = .95F;
         // private const float MinimumMovementVelocityThreshold = .3F;
 
         private Vector3[] _velocityHistory;
@@ -95,6 +97,11 @@ namespace Snowballers
                       - headCollider.transform.position).normalized * maxArmLength;
         }
 
+        private void OnCollisionStay(Collision other)
+        {
+            // if (other.co)
+        }
+
         /*private Vector3 CurrentLeftHandPosition()
         {
             if ((PositionWithOffset(leftHandTransform, leftHandOffset) - headCollider.transform.position).magnitude < maxArmLength)
@@ -133,7 +140,9 @@ namespace Snowballers
             
             var leftHandPosition = CurrentHandPosition(OVRInput.Handedness.LeftHanded);
             var rightHandPosition = CurrentHandPosition(OVRInput.Handedness.RightHanded);
-            var gravityForce = Vector3.down * (GravityForce * GravityMultiplier * Time.deltaTime * Time.deltaTime);
+            var gravityForce = slopeCalculation.IsOnSlope 
+                ? Vector3.zero 
+                : Vector3.down * (GravityForce * GravityMultiplier * Time.deltaTime);
 
             var leftMovementVector = _lastLeftHandPosition - leftHandPosition;
             var leftMovementDirection = GetMovementVectorForHand(leftHandPosition, minimumRaycastDistance * defaultPrecision, leftMovementVector, OVRInput.Handedness.LeftHanded);
@@ -179,7 +188,7 @@ namespace Snowballers
                 // }
             }
             
-            Move(leftMovementProjection + rightMovementProjection);
+            Move(leftMovementProjection + rightMovementProjection + gravityForce);
 
             _lastLeftHandPosition = leftHandPosition;
             _lastRightHandPosition = rightHandPosition;
