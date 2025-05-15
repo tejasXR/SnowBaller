@@ -995,7 +995,7 @@ MonoBehaviour:
   desktopRig: {fileID: 456776001}
   forceVROnAndroid: 1
   rigSelected: 0
-  mode: 2
+  mode: 3
 --- !u!4 &480358312
 Transform:
   m_ObjectHideFlags: 0
@@ -1686,7 +1686,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gameMode: 2
-  roomName: SampleFusionVRSharedNetworkBasedGrabbing
+  roomName: SnowballersSampleRoom
   connectOnStart: 1
   playerCount: 0
   connectionCriterias: 1
@@ -4466,10 +4466,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 106515707}
     m_Modifications:
-    - target: {fileID: 530733960591757674, guid: 248ba295785ac0c44a96b152ed8befa3, type: 3}
-      propertyPath: customGravity
-      value: 1000
-      objectReference: {fileID: 0}
     - target: {fileID: 3183593570733261954, guid: 248ba295785ac0c44a96b152ed8befa3, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.71458805
