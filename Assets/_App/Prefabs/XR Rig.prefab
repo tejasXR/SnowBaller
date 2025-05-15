@@ -300,8 +300,13 @@ MonoBehaviour:
   leftHandFollower: {fileID: 1074147296098439420}
   rightHandTransform: {fileID: 1074147295958783623}
   rightHandFollower: {fileID: 1074147296294150592}
-  rightHandOffset: {x: 0.05, y: -0.2, z: 0}
-  leftHandOffset: {x: -0.05, y: -0.2, z: 0}
+  rightHandOffset: {x: 0.05, y: -0.6, z: 0}
+  leftHandOffset: {x: -0.05, y: -0.6, z: 0}
+  movementAmplifier: 400
+  handDragAmplifier: 0.005
+  jumpDirectionAmplifier: 2.25
+  minimumMovementVelocityThreshold: 0.085
+  maximumJumpVelocity: 55
   locomotionEnabledLayers:
     serializedVersion: 2
     m_Bits: 1

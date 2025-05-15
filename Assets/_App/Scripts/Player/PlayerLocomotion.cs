@@ -41,7 +41,7 @@ namespace Snowballer
         [SerializeField] [Range(0,.01F)] private float handDragAmplifier = .005F;
         [SerializeField] private float jumpDirectionAmplifier = 30F;
         [SerializeField] private float minimumMovementVelocityThreshold = .3F;
-        [SerializeField] private float minimumJumpVelocityThreshold = .3F;
+        // [SerializeField] private float minimumJumpVelocityThreshold = .3F;
         [SerializeField] private float maximumJumpVelocity = 5F;
 
         [SerializeField] private LayerMask locomotionEnabledLayers;
@@ -157,6 +157,8 @@ namespace Snowballer
                 var direction = leftMovementDirection.Value;
 
                 leftMovementProjection = direction * movementAmplifier;
+                
+                leftMovementProjection.y = Mathf.Clamp(leftMovementProjection.y, 0, maximumJumpVelocity);
                 leftMovementProjection.y *= jumpMultiplier;
                 // Vector3.ProjectOnPlane(direction * movementAmplifier, Vector3.up);
 
@@ -174,7 +176,12 @@ namespace Snowballer
             {
                 var direction = rightMovementDirection.Value;
 
+                // TEJAS: We don't project our Vector on a plane like the original GT locomotion
+                // As a result, our move feels a bit more responsive and natural
                 rightMovementProjection = direction * movementAmplifier;
+
+                // Jump height
+                rightMovementProjection.y = Mathf.Clamp(rightMovementProjection.y, 0, maximumJumpVelocity);
                 rightMovementProjection.y *= jumpMultiplier;
 
                     // Vector3.ProjectOnPlane(direction * movementAmplifier, Vector3.up);
