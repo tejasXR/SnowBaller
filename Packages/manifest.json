@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "com.cysharp.unitask": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
     "com.hwaet.projectcloner": "https://github.com/hwaet/UnityProjectCloner.git",
     "com.meta.xr.sdk.haptics": "76.0.0",
     "com.unity.2d.sprite": "1.0.0",
