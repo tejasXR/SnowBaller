@@ -25,6 +25,7 @@ namespace Snowballers
         [Networked] private Quaternion LocalRotationOffset { get; set; }
 
         public bool IsGrabbed => CurrentGrabber != null;
+        public float ThrowVelocityMultiplier => throwVelocityMultiplier;
 
         [SerializeField] private GrabbingTypeEnum grabbingType;
         [Tooltip("For object with a rigidbody, if true, apply hand velocity on ungrab")]
@@ -70,7 +71,7 @@ namespace Snowballers
 
         private Status _status = Status.NotGrabbed;
 
-        private Vector3 Velocity
+        public Vector3 Velocity
         {
             get
             {
@@ -89,7 +90,7 @@ namespace Snowballers
             }
         }
 
-        private Vector3 AngularVelocity
+        public Vector3 AngularVelocity
         {
             get
             {
@@ -197,13 +198,18 @@ namespace Snowballers
             // We apply release velocity if needed
             if (networkRigidbody && networkRigidbody.Rigidbody.isKinematic == false && applyVelocityOnRelease)
             {
-                networkRigidbody.Rigidbody.linearVelocity = Velocity * throwVelocityMultiplier;
-                networkRigidbody.Rigidbody.angularVelocity = AngularVelocity;
+                SetVelocity(Velocity * throwVelocityMultiplier , AngularVelocity);
             }
 
             // Reset velocity tracking
             for (int i = 0; i < VelocityBufferSize; i++) _lastDeltaTime[i] = 0;
             _lastMoveIndex = 0;
+        }
+
+        public void SetVelocity(Vector3 linearVelocity, Vector3 angularVelocity)
+        {
+            networkRigidbody.Rigidbody.linearVelocity = linearVelocity;
+            networkRigidbody.Rigidbody.angularVelocity = angularVelocity;
         }
 
         bool TryDetectGrabberChange(NetworkBehaviour.ChangeDetector changeDetector, out CustomNetworkHandColliderGrabber previousGrabber, out CustomNetworkHandColliderGrabber currentGrabber)
