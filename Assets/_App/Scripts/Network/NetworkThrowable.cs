@@ -1,15 +1,21 @@
 using System;
 using Fusion;
 using Fusion.Addons.Physics;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 namespace Snowballers.Network
 {
     public class NetworkThrowable : NetworkBehaviour
     {
-        public event Action ThrowableDestroyedCallback;
+        public event Action ThrowableGrabbedCallback;
         public event Action ThrowableThrownCallback;
-        
+        public event Action ThrowableDestroyedCallback;
+
+        [Networked] public PlayerRef ThrowingPlayer { get; set; }
+
+        public CustomNetworkHandColliderGrabbable Grabbable => _grabbable;
+
         [SerializeField] private NetworkRigidbody3D networkRigidbody;
         [SerializeField] private LayerMask collisionMask;
 
@@ -38,11 +44,19 @@ namespace Snowballers.Network
         {
             if (Physics.CheckSphere(throwableCollider.transform.position, throwableCollider.radius, collisionMask))
             {
+                // Don't do anything if we've colliding with another object our local player has thrown
+                var collidingThrowable = other.collider.GetComponentInParent<NetworkThrowable>();
+                if (collidingThrowable)
+                {
+                    if (collidingThrowable.ThrowingPlayer == Runner.LocalPlayer)
+                    {
+                        return;
+                    }
+                }
+                
                 if (shouldDestroyOnCollision)
                 {
-                    DestroyBehaviour(this); // TEJAS: Does this actually destroy over network? 
-                    Destroy(gameObject);
-                    ThrowableDestroyedCallback?.Invoke();
+                    Destroy();
                 }
             }
         }
@@ -64,13 +78,36 @@ namespace Snowballers.Network
         private void OnDidGrab(CustomNetworkHandColliderGrabber grabber)
         {
             distanceGrabCollider.enabled = false;
+            ThrowableGrabbedCallback?.Invoke();
         }
 
         private void OnDidUngrab()
         {
+            SetThrownState();
+        }
+
+        public void SetThrownState()
+        {
             _isGravityEnabled = true;
             throwableCollider.enabled = true;
+            distanceGrabCollider.enabled = false;
+            ThrowingPlayer = Runner.LocalPlayer;
+            if (ThrowingPlayer == Runner.LocalPlayer)
+            {
+                for (int i = 0; i < gameObject.transform.childCount; i++)
+                {
+                    gameObject.transform.GetChild(i).gameObject.layer = LayerMask.NameToLayer("LocalThrowable");
+                }
+            }
+            
             ThrowableThrownCallback?.Invoke();
+        }
+
+        public void Destroy()
+        {
+            ThrowableDestroyedCallback?.Invoke();
+            DestroyBehaviour(this); // TEJAS: Does this actually destroy over network? 
+            Destroy(gameObject);
         }
     }
 }

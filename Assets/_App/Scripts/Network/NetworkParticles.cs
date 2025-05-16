@@ -24,7 +24,7 @@ namespace Snowballers.Network
                 return;
             }
             
-            if (!particleVfx.isStopped || !particleVfx.IsAlive())
+            if (!particleVfx.isStopped)
             {
                 return;
             }
