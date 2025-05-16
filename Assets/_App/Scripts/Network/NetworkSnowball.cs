@@ -1,67 +1,32 @@
-using System;
-using Fusion;
-using Fusion.Addons.Physics;
 using UnityEngine;
 
 namespace Snowballers.Network
 {
-    [RequireComponent(typeof(CustomNetworkHandColliderGrabbable))]
-    public class NetworkSnowball : NetworkBehaviour
+    public class NetworkSnowball : NetworkThrowable
     {
-        [SerializeField] private NetworkRigidbody3D networkRigidbody;
-        [SerializeField] private float customGravity = 98F;
-        [Space]
-        [SerializeField] private Transform visualAffordanceSphere;
-        [SerializeField] private float visualAffordanceRotationSpeed = 10F;
-        [Space]
-        [SerializeField] private SphereCollider sphereCollider;
-        [SerializeField] private SphereCollider distanceGrabCollider;
-        
-        private CustomNetworkHandColliderGrabbable _grabbable;
-        private bool _isGravityEnabled;
+        [Header("Snowball Properties")]
+        [SerializeField] private TrailRenderer trailRenderer;
+        [SerializeField] private NetworkParticles snowballDestroyVfx;
 
         private void Awake()
         {
-            _grabbable = GetComponent<CustomNetworkHandColliderGrabbable>();
-            
-            _grabbable.onDidGrab.AddListener(OnDidGrab);
-            _grabbable.onWillGrab.AddListener(OnWillGrab);
-            _grabbable.onDidUngrab.AddListener(OnDidUngrab);
+            ThrowableThrownCallback += OnThrowableThrown;
+            ThrowableDestroyedCallback += OnThrowableDestroyed;
         }
 
         private void Start()
         {
-            sphereCollider.enabled = false;
+            trailRenderer.emitting = false;
         }
 
-        private void Update()
+        private void OnThrowableThrown()
         {
-            visualAffordanceSphere.transform.Rotate(Vector3.up, Time.deltaTime * visualAffordanceRotationSpeed);
+            trailRenderer.emitting = true;
         }
 
-        private void FixedUpdate()
+        private void OnThrowableDestroyed()
         {
-            if (_isGravityEnabled)
-            {
-                var gravityForce = Vector3.down * (customGravity * Time.deltaTime);
-                networkRigidbody.Rigidbody.AddForce(gravityForce);
-            } 
-        }
-
-        private void OnWillGrab(CustomNetworkHandColliderGrabber grabber)
-        {
-            networkRigidbody.Rigidbody.isKinematic = true;
-        }
-        
-        private void OnDidGrab(CustomNetworkHandColliderGrabber grabber)
-        {
-            distanceGrabCollider.enabled = false;
-        }
-        
-        private void OnDidUngrab()
-        { 
-            _isGravityEnabled = true;
-            sphereCollider.enabled = true;
+            Runner.Spawn(snowballDestroyVfx, transform.position, Quaternion.identity);
         }
     }
 }
