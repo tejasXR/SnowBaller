@@ -393,7 +393,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 257
   shouldDestroyOnCollision: 1
-  customGravity: 400
+  customGravity: 450
   throwableCollider: {fileID: 6892009256337597773}
   distanceGrabCollider: {fileID: 2690739111848105997}
   trailRenderer: {fileID: 9109558121274975328}

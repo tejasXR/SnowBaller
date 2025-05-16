@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5274666785815282509}
   - component: {fileID: 3186451817414320146}
+  - component: {fileID: 6598115824799717868}
   - component: {fileID: 5479290994754941126}
   m_Layer: 0
   m_Name: Snowbal VFX
@@ -51,8 +52,26 @@ MonoBehaviour:
   Flags: 1
   NestedObjects: []
   NetworkedBehaviours:
+  - {fileID: 6598115824799717868}
   - {fileID: 5479290994754941126}
   ForceRemoteRenderTimeframe: 0
+--- !u!114 &6598115824799717868
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2569405261730738700}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 158639473, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _stateAuthorityChangeErrorCorrectionDelta: 0
+  SyncScale: 0
+  SyncParent: 0
+  _autoAOIOverride: 1
+  DisableSharedModeInterpolation: 0
 --- !u!114 &5479290994754941126
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -65,7 +84,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4b074cfc59f94924d8f616913bf21cb5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  shouldPlayOnSpawn: 1
   particleVfx: {fileID: 5796353530351459616}
 --- !u!1 &8891785116399724669
 GameObject:
