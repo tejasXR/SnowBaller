@@ -5,17 +5,32 @@ namespace Snowballers.Network
 {
     public class NetworkParticles : NetworkBehaviour
     {
-        [SerializeField] private bool shouldPlayOnSpawn;
         [SerializeField] private ParticleSystem particleVfx;
 
+        private bool _vfxStarted;
+        
         public override void Spawned()
         {
             base.Spawned();
+            particleVfx.Play();
+            _vfxStarted = true;
+        }
 
-            if (shouldPlayOnSpawn)
+        public override void FixedUpdateNetwork()
+        {
+            base.FixedUpdateNetwork();
+            if (!_vfxStarted)
             {
-                particleVfx.Play();
+                return;
             }
+            
+            if (!particleVfx.isStopped || !particleVfx.IsAlive())
+            {
+                return;
+            }
+            
+            DestroyBehaviour(this);
+            Destroy(gameObject);
         }
     }
 }
