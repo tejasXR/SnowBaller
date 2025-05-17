@@ -7,8 +7,8 @@ namespace Snowballers.Network
 {
     public class NetworkGameBoard : NetworkBehaviour, IPlayerJoined, IPlayerLeft
     {
-        public event Action PlayerJoinedCallback;
-        public event Action PlayerLeftCallback;
+        public event Action<PlayerRef, bool> PlayerJoinedCallback;
+        public event Action<PlayerRef, bool> PlayerLeftCallback;
         public event Action<Dictionary<PlayerRef, int>> PlayerScoresChangedCallback;
         
         private readonly Dictionary<PlayerRef, int> _playerScores = new Dictionary<PlayerRef, int>();
@@ -16,15 +16,16 @@ namespace Snowballers.Network
         public void PlayerJoined(PlayerRef player)
         {
             var networkRig = GetPlayerRigFromRef(player);
-            var networkPlayerHealth = networkRig.GetComponentInChildren<NetworkPlayerHealth>();
+            var networkPlayerHealth = networkRig.GetComponentInChildren<NetworkHealth>();
             if (!networkPlayerHealth)
             {
                 return;
             }
             
             _playerScores.Add(player, 0);
-            networkPlayerHealth.PlayerDeadCallback += OnPlayerDied;
-            PlayerJoinedCallback?.Invoke();
+            networkPlayerHealth.NoHealthLeft += OnPlayerDied;
+            var isLocal = Runner.LocalPlayer == player;
+            PlayerJoinedCallback?.Invoke(player, isLocal);
         }
         
         public void PlayerLeft(PlayerRef player)
@@ -32,7 +33,8 @@ namespace Snowballers.Network
             if (_playerScores.ContainsKey(player))
             {
                 _playerScores.Remove(player);
-                PlayerLeftCallback?.Invoke();
+                var isLocal = Runner.LocalPlayer == player;
+                PlayerLeftCallback?.Invoke(player, isLocal);
             }
         }
 
