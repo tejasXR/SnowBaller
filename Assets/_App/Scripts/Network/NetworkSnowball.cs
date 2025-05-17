@@ -7,6 +7,7 @@ namespace Snowballers.Network
     {
         [Header("Snowball Properties")]
         [Networked] public float Damage { get; set; }
+        [Networked, OnChangedRender(nameof(OnRemoteTrailIsEmittingChanged))] private bool IsTrailEmitting { get; set; }
         [SerializeField] private TrailRenderer trailRenderer;
         [SerializeField] private NetworkParticles snowballDestroyVfx;
 
@@ -18,12 +19,23 @@ namespace Snowballers.Network
 
         private void Start()
         {
-            trailRenderer.emitting = false;
+            ChangeLocalTrailIsEmitting(false);
         }
 
+        private void ChangeLocalTrailIsEmitting(bool isEmitting)
+        {
+            IsTrailEmitting = isEmitting;
+        }
+
+        private void OnRemoteTrailIsEmittingChanged(NetworkBehaviourBuffer previous)
+        {
+            var prevValue = GetPropertyReader<bool>(nameof(IsTrailEmitting)).Read(previous);
+            trailRenderer.emitting = prevValue;
+        }
+        
         private void OnThrowableThrown()
         {
-            trailRenderer.emitting = true;
+            ChangeLocalTrailIsEmitting(true);
         }
 
         private void OnThrowableDestroyed()
@@ -33,10 +45,10 @@ namespace Snowballers.Network
 
         protected override void OnCollision(Collision collision)
         {
-            var playerHealth = collision.gameObject.GetComponentInParent<PlayerHealth>();
+            var playerHealth = collision.gameObject.GetComponentInParent<Health>();
             if (playerHealth)
             {
-                playerHealth.Hit(Damage);
+                playerHealth.Reduce(Damage);
             }
         }
     }
