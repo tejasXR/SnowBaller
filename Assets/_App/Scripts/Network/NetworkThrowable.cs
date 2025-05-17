@@ -39,7 +39,7 @@ namespace Snowballers.Network
             throwableCollider.enabled = false;
         }
 
-        private void OnCollisionStay(Collision other)
+        private void OnCollisionEnter(Collision other)
         {
             if (Physics.CheckSphere(throwableCollider.transform.position, throwableCollider.radius, collisionMask))
             {
@@ -55,10 +55,13 @@ namespace Snowballers.Network
                 
                 if (shouldDestroyOnCollision)
                 {
+                    OnCollision(other);
                     Destroy();
                 }
             }
         }
+
+        protected virtual void OnCollision(Collision collision) { }
 
         private void FixedUpdate()
         {

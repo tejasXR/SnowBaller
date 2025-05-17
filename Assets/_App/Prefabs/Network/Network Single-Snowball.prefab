@@ -396,6 +396,7 @@ MonoBehaviour:
   customGravity: 450
   throwableCollider: {fileID: 6892009256337597773}
   distanceGrabCollider: {fileID: 2690739111848105997}
+  _Damage: 1
   trailRenderer: {fileID: 9109558121274975328}
   snowballDestroyVfx: {fileID: 5479290994754941126, guid: ecf54de1f1f0bba44a0413d452f2f6b0, type: 3}
 --- !u!4 &5497243108055608103 stripped
