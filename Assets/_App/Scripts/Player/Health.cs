@@ -3,10 +3,10 @@ using UnityEngine;
 
 namespace Snowballers
 {
-    public class PlayerHealth : MonoBehaviour
+    public class Health : MonoBehaviour
     {
         public event Action<float> HealthValueChangedCallback;
-        public event Action PlayerDeadCallback;
+        public event Action NoHealthLeftCallback;
         
         [SerializeField] private float maxHealth = 2;
 
@@ -20,13 +20,13 @@ namespace Snowballers
             HealthValueChangedCallback?.Invoke(_currentHealth);
         }
         
-        public void Hit(float damage)
+        public void Reduce(float damage)
         {
             _currentHealth -= damage;
 
             if (_currentHealth <= 0)
             {
-                PlayerDeadCallback?.Invoke();
+                NoHealthLeftCallback?.Invoke();
                 return;
             }
             
