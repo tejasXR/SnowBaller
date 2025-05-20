@@ -135,7 +135,7 @@ namespace Snowballers
         
         public void ToggleMovement(bool shouldEnableMovement)
         {
-            disableMovement = shouldEnableMovement;
+            disableMovement = !shouldEnableMovement;
         }
 
         private Vector3 CurrentHandPosition(OVRInput.Handedness handedness)
