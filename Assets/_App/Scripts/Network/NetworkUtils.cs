@@ -5,10 +5,10 @@ namespace Snowballers.Network
 {
     public static class NetworkUtils
     {
-        public static Player GetPlayerRigFromRef(NetworkRunner runner, PlayerRef playerRef)
+        public static NetworkPlayer GetPlayerRigFromRef(NetworkRunner runner, PlayerRef playerRef)
         {
             runner.TryGetPlayerObject(playerRef, out var playerNetworkObject);
-            return playerNetworkObject ? playerNetworkObject.GetComponent<Player>() : null;
+            return playerNetworkObject ? playerNetworkObject.GetComponent<NetworkPlayer>() : null;
         }
     }
 }
