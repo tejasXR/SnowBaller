@@ -1136,6 +1136,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerLocomotion: {fileID: 4723942103716881948}
+  hardwareRig: {fileID: 6030931097217545834}
+  rb: {fileID: 1074147295606221672}
 --- !u!1 &6030931097335155327
 GameObject:
   m_ObjectHideFlags: 0
