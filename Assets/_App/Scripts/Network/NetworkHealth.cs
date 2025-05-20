@@ -53,6 +53,7 @@ namespace Snowballers.Network
         private void OnDead()
         {
             NoHealthLeft?.Invoke(Runner.LocalPlayer);
+            _playerHealth.ResetHealth();
         }
 
         private void ChangeLocalColor(Color color)
