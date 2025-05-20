@@ -108,7 +108,7 @@ namespace Snowballers.Network
         public void Destroy()
         {
             ThrowableDestroyedCallback?.Invoke();
-            DestroyBehaviour(this); // TEJAS: Does this actually destroy over network? 
+            DestroyBehaviour(this); 
             Destroy(gameObject);
         }
     }

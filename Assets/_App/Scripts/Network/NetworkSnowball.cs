@@ -49,6 +49,7 @@ namespace Snowballers.Network
             if (playerHealth)
             {
                 playerHealth.Reduce(Damage);
+                Destroy();
             }
         }
     }
