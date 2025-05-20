@@ -5,21 +5,29 @@ using UnityEngine;
 
 namespace Snowballers.Network
 {
-    public class NetworkPlayerSpawner : NetworkBehaviour, IPlayerJoined, IPlayerLeft
+    public class NetworkPlayerSpawner : NetworkBehaviour
     {
+        [SerializeField] private NetworkPlayerManager networkPlayerManager;
         [SerializeField] private NetworkTransform[] spawnPointTransforms;
         
         [Networked] private NetworkDictionary<PlayerRef, NetworkTransform> PlayerSpawnPointPlacement { get; }
-        
-        public void PlayerJoined(PlayerRef player)
+
+        public override void Spawned()
         {
-            var networkRig = NetworkUtils.GetPlayerRigFromRef(Runner, player);
-            if (!networkRig)
-            {
-                return;
-            }
-            
-            var networkPlayerHealth = networkRig.GetComponentInChildren<NetworkHealth>();
+            networkPlayerManager.PlayerJoinedCallback += PlayerJoined;
+            networkPlayerManager.PlayerLeftCallback += PlayerLeft;
+        }
+
+        public override void Despawned(NetworkRunner runner, bool hasState)
+        {
+            networkPlayerManager.PlayerJoinedCallback -= PlayerJoined;
+            networkPlayerManager.PlayerLeftCallback -= PlayerLeft;
+        }
+
+
+        private void PlayerJoined(PlayerRef player, NetworkPlayer networkPlayer)
+        {
+            var networkPlayerHealth = networkPlayer.GetComponentInChildren<NetworkHealth>();
             if (!networkPlayerHealth)
             {
                 return;
@@ -40,12 +48,21 @@ namespace Snowballers.Network
                 openSpawnPoint = spawnPoint == firstSpawnPoint ? secondSpawnPoint : firstSpawnPoint;
             }
             
-            PlayerSpawnPointPlacement.Add(player, openSpawnPoint);
-            networkPlayerHealth.NoHealthLeft += RespawnPlayers;
-            // SpawnPlayerAsync(player, openSpawnPoint).Forget();
+            if (Runner.ActivePlayers.Count() == 1)
+            {
+                // Clear values from memory if we are the first player joining
+                PlayerSpawnPointPlacement.Clear();
+            }
+            
+            if (!PlayerSpawnPointPlacement.ContainsKey(player))
+            {
+                PlayerSpawnPointPlacement.Add(player, openSpawnPoint);
+                networkPlayerHealth.NoHealthLeft += RespawnPlayers;
+                SpawnPlayer(player, openSpawnPoint);
+            }
         }
-        
-        public void PlayerLeft(PlayerRef player)
+
+        private void PlayerLeft(PlayerRef player, NetworkPlayer networkPlayer)
         {
             if (PlayerSpawnPointPlacement.ContainsKey(player))
             {
@@ -61,24 +78,19 @@ namespace Snowballers.Network
         {
             foreach (var kvp in PlayerSpawnPointPlacement)
             {
-                SpawnPlayerAsync(kvp.Key, kvp.Value).Forget();
+                SpawnPlayer(kvp.Key, kvp.Value);
             }
         }
 
-        private async UniTask SpawnPlayerAsync(PlayerRef playerRef, NetworkTransform spawnTransform)
+        private void SpawnPlayer(PlayerRef playerRef, NetworkTransform spawnTransform)
         {
-            var player = NetworkUtils.GetPlayerRigFromRef(Runner, playerRef);
-            var networkObject = player.GetComponent<NetworkObject>();
-            
-            await UniTask.WaitForEndOfFrame();
-            
-            networkObject.RequestStateAuthority();
-            
-            player.Teleport(spawnTransform.transform.position, spawnTransform.transform.rotation);
+            if (Runner.LocalPlayer != playerRef)
+            {
+                return;
+            }
 
-            await UniTask.WaitForEndOfFrame();
-            
-            networkObject.ReleaseStateAuthority();
+            var localPlayer = FindFirstObjectByType<Player>();
+            localPlayer.TeleportAsync(spawnTransform.transform.position, spawnTransform.transform.rotation).Forget();
         }
     }
 }
