@@ -1,59 +1,85 @@
 using System;
 using Fusion;
-using Fusion.XR.Shared.Rig;
 using UnityEngine;
 
 namespace Snowballers.Network
 {
     public class NetworkHealth : NetworkBehaviour
     {
-        public event Action<PlayerRef> NoHealthLeft;
+        private event Action<float> HealthValueChangedCallback;
+        public event Action<PlayerRef> NoHealthLeftCallback;
         
+        [SerializeField] private float maxHealth = 2;
         [SerializeField] private MeshRenderer meshRenderer;
         [SerializeField] private Color healthNormalColor;
         [SerializeField] private Color healthCriticalColor;
         
+        public float HealthPercentage => _currentHealthLocal / maxHealth;
+        
+        // [Networked(OnChanged = nameof(OnRemoteCurrentHealthChanged))]
+        // public float AnotherHealth { get; set; }
+
+        
+        [Networked] 
+        public float CurrentHealth { get; set; }
+        
         [Networked, OnChangedRender(nameof(OnRemoteColorChanged))]
         private Color NetworkedColor { get; set; }
-        
-        private Health _playerHealth;
+
+        private float _currentHealthLocal;
+        private ChangeDetector _changeDetector;
         
         public override void Spawned()
         {
-            base.Spawned();
-
-            if (!Object || !Object.HasStateAuthority)
-            {
-                return;
-            }
+            _changeDetector = GetChangeDetector(ChangeDetector.Source.SimulationState);
             
-            var hardwareRig = FindFirstObjectByType<HardwareRig>(FindObjectsInactive.Exclude);
-            if (!hardwareRig)
-            {
-                return;
-            }
-            
-            _playerHealth = hardwareRig.GetComponentInChildren<Health>();
-            if (_playerHealth == null)
-            {
-                Debug.LogError($"Cannot find {nameof(Health)} component on local {nameof(HardwareRig)} object {hardwareRig.gameObject.name}");
-                return;
-            }
+            ResetHealth();
+            HealthValueChangedCallback += OnPlayerHealthValueChanged;
+        }
 
-            _playerHealth.HealthValueChangedCallback += OnPlayerHealthValueChanged;
-            _playerHealth.NoHealthLeftCallback += OnDead;
+        public override void Despawned(NetworkRunner runner, bool hasState)
+        {
+            HealthValueChangedCallback -= OnPlayerHealthValueChanged;
+        }
+
+        public override void FixedUpdateNetwork()
+        {
+            foreach (var property in _changeDetector.DetectChanges( this, out var previousBuffer, out var currentBuffer))
+            {
+                switch (property)
+                {
+                    case nameof(CurrentHealth):
+                    {
+                        var reader = GetPropertyReader<float>(property);
+                        var (previous,current) = reader.Read(previousBuffer, currentBuffer);
+                        _currentHealthLocal = current;
+                        break;
+                    }
+                }
+            }
+        }
+
+        private void ResetHealth()
+        {
+            ChangeLocalHealthValue(maxHealth);
+        }
+        
+        public void Reduce(float damage)
+        {
+            var newHealth = CurrentHealth - damage;
+            ChangeLocalHealthValue(newHealth);
         }
 
         private void OnPlayerHealthValueChanged(float healthValue)
         {
-            var color = Color.Lerp(healthNormalColor, healthCriticalColor, _playerHealth.HealthPercentage);
+            var color = Color.Lerp(healthCriticalColor, healthNormalColor, HealthPercentage);
             ChangeLocalColor(color);
         }
 
         private void OnDead()
         {
-            NoHealthLeft?.Invoke(Runner.LocalPlayer);
-            _playerHealth.ResetHealth();
+            NoHealthLeftCallback?.Invoke(Runner.LocalPlayer);
+            ResetHealth();
         }
 
         private void ChangeLocalColor(Color color)
@@ -64,6 +90,22 @@ namespace Snowballers.Network
         private void OnRemoteColorChanged()
         {
             meshRenderer.material.color = NetworkedColor;
+        }
+
+        private void ChangeLocalHealthValue(float healthValue)
+        {
+            CurrentHealth = healthValue;
+        }
+
+        private void OnRemoteCurrentHealthChanged()
+        {
+            _currentHealthLocal = CurrentHealth;
+            HealthValueChangedCallback?.Invoke(CurrentHealth);
+            
+            if (_currentHealthLocal <= 0)
+            {
+                OnDead();
+            }
         }
     }
 }
