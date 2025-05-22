@@ -11,8 +11,11 @@ namespace Snowballers.Network
         public event Action ThrowableThrownCallback;
         public event Action ThrowableDestroyedCallback;
 
+        [Networked] private int ThrownTick { get; set; }
+        [Networked] private Vector3 ThrownPosition { get; set; }
+        [Networked] private Vector3 ThrownVelocity { get; set; }
         [Networked] public PlayerRef ThrowingPlayer { get; set; }
-
+        
         public CustomNetworkHandColliderGrabbable Grabbable => _grabbable;
 
         [SerializeField] private NetworkRigidbody3D networkRigidbody;
@@ -36,7 +39,7 @@ namespace Snowballers.Network
             _grabbable.onWillGrab.AddListener(OnWillGrab);
             _grabbable.onDidUngrab.AddListener(OnDidUngrab);
             
-            throwableCollider.enabled = false;
+            throwableCollider.isTrigger = true;
         }
 
         private void OnCollisionEnter(Collision other)
@@ -88,11 +91,22 @@ namespace Snowballers.Network
             SetThrownState();
         }
 
+        // Same method can be used both for FUN and Render calls
+        protected Vector3 GetMovePosition(float currentTick)
+        {
+            float time = (currentTick - ThrownTick) * Runner.DeltaTime;
+
+            if (time <= 0f)
+                return ThrownPosition;
+
+            return ThrownPosition + ThrownVelocity * time;
+        }
+
         public void SetThrownState()
         {
             _isGravityEnabled = true;
-            throwableCollider.enabled = true;
             distanceGrabCollider.enabled = false;
+            throwableCollider.isTrigger = false;
             ThrowingPlayer = Runner.LocalPlayer;
             if (ThrowingPlayer == Runner.LocalPlayer)
             {
@@ -102,12 +116,18 @@ namespace Snowballers.Network
                 }
             }
             
+            // Save throw data
+            ThrownTick = Runner.Tick;
+            ThrownPosition = transform.position;
+            ThrownVelocity = _grabbable.Velocity;
+            
             ThrowableThrownCallback?.Invoke();
         }
 
         public void Destroy()
         {
             ThrowableDestroyedCallback?.Invoke();
+            Runner.Despawn(Object);
             DestroyBehaviour(this); 
             Destroy(gameObject);
         }
