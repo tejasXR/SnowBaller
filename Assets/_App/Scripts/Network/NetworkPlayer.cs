@@ -13,7 +13,7 @@ namespace Snowballers.Network
 
         private PlayerRef _playerRef;
         private NetworkPlayerManager _networkPlayerManager;
-        
+
         public void PlayerJoined(PlayerRef player)
         {
             _playerRef = player;

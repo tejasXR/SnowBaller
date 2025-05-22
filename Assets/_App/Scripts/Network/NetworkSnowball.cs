@@ -50,7 +50,7 @@ namespace Snowballers.Network
                 return;
             }
                 
-            playerHealth.Reduce(Damage);
+            playerHealth.ReduceHealthRpc(Damage);
         }
 
         /*public override void FixedUpdateNetwork()

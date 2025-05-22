@@ -16,11 +16,7 @@ namespace Snowballers.Network
         
         public float HealthPercentage => _currentHealthLocal / maxHealth;
         
-        // [Networked(OnChanged = nameof(OnRemoteCurrentHealthChanged))]
-        // public float AnotherHealth { get; set; }
-
-        
-        [Networked] 
+        [Networked, OnChangedRender(nameof(OnRemoteCurrentHealthChanged))] 
         public float CurrentHealth { get; set; }
         
         [Networked, OnChangedRender(nameof(OnRemoteColorChanged))]
@@ -33,7 +29,7 @@ namespace Snowballers.Network
         {
             _changeDetector = GetChangeDetector(ChangeDetector.Source.SimulationState);
             
-            ResetHealth();
+            ResetHealthRpc();
             HealthValueChangedCallback += OnPlayerHealthValueChanged;
         }
 
@@ -42,29 +38,14 @@ namespace Snowballers.Network
             HealthValueChangedCallback -= OnPlayerHealthValueChanged;
         }
 
-        public override void FixedUpdateNetwork()
-        {
-            foreach (var property in _changeDetector.DetectChanges( this, out var previousBuffer, out var currentBuffer))
-            {
-                switch (property)
-                {
-                    case nameof(CurrentHealth):
-                    {
-                        var reader = GetPropertyReader<float>(property);
-                        var (previous,current) = reader.Read(previousBuffer, currentBuffer);
-                        _currentHealthLocal = current;
-                        break;
-                    }
-                }
-            }
-        }
-
-        private void ResetHealth()
+        [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+        private void ResetHealthRpc()
         {
             ChangeLocalHealthValue(maxHealth);
         }
         
-        public void Reduce(float damage)
+        [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+        public void ReduceHealthRpc(float damage)
         {
             var newHealth = CurrentHealth - damage;
             ChangeLocalHealthValue(newHealth);
@@ -79,7 +60,7 @@ namespace Snowballers.Network
         private void OnDead()
         {
             NoHealthLeftCallback?.Invoke(Runner.LocalPlayer);
-            ResetHealth();
+            ResetHealthRpc();
         }
 
         private void ChangeLocalColor(Color color)
