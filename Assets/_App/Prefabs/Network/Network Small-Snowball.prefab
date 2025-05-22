@@ -104,7 +104,7 @@ SphereCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
-  m_Enabled: 0
+  m_Enabled: 1
   serializedVersion: 3
   m_Radius: 0.5
   m_Center: {x: -0.0000009536743, y: 0, z: -0.0000076293945}
@@ -338,7 +338,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3183593570733261955, guid: 248ba295785ac0c44a96b152ed8befa3, type: 3}
       propertyPath: m_Name
-      value: Network Single-Snowball
+      value: Network Small-Snowball
       objectReference: {fileID: 0}
     - target: {fileID: 3183593570733261967, guid: 248ba295785ac0c44a96b152ed8befa3, type: 3}
       propertyPath: SortKey
@@ -391,7 +391,7 @@ MonoBehaviour:
   networkRigidbody: {fileID: 6261360803999950175}
   collisionMask:
     serializedVersion: 2
-    m_Bits: 257
+    m_Bits: 2305
   shouldDestroyOnCollision: 1
   customGravity: 450
   throwableCollider: {fileID: 6892009256337597773}
