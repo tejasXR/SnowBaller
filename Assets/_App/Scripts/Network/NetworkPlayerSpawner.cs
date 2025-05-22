@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Fusion;
@@ -5,12 +6,19 @@ using UnityEngine;
 
 namespace Snowballers.Network
 {
+    [Serializable]
+    public struct SpawnPoint: INetworkStruct
+    {
+        public Vector3 position;
+        public Quaternion rotation;
+    }
+    
     public class NetworkPlayerSpawner : NetworkBehaviour
     {
         [SerializeField] private NetworkPlayerManager networkPlayerManager;
         [SerializeField] private NetworkTransform[] spawnPointTransforms;
         
-        [Networked] private NetworkDictionary<PlayerRef, NetworkTransform> PlayerSpawnPointPlacement { get; }
+        [Networked] private NetworkDictionary<PlayerRef, SpawnPoint> PlayerSpawnPointPlacement { get; }
 
         public override void Spawned()
         {
@@ -24,28 +32,42 @@ namespace Snowballers.Network
             networkPlayerManager.PlayerLeftCallback -= PlayerLeft;
         }
 
-
         private void PlayerJoined(PlayerRef player, NetworkPlayer networkPlayer)
         {
+            // Only handle spawning for local players
+            if (Runner.LocalPlayer != player)
+            {
+                return;
+            }
+            
             var networkPlayerHealth = networkPlayer.GetComponentInChildren<NetworkHealth>();
             if (!networkPlayerHealth)
             {
                 return;
             }
 
-            NetworkTransform openSpawnPoint;
-            var firstSpawnPoint = spawnPointTransforms[0];
-            var secondSpawnPoint = spawnPointTransforms[1];
+            SpawnPoint openSpawnPosition;
+            var firstSpawnPoint = new SpawnPoint()
+            {
+                position = spawnPointTransforms[0].transform.position,
+                rotation = spawnPointTransforms[0].transform.rotation
+            };
+
+            var secondSpawnPoint = new SpawnPoint()
+            {
+                position = spawnPointTransforms[1].transform.position,
+                rotation = spawnPointTransforms[1].transform.rotation
+            };
             
             if (PlayerSpawnPointPlacement.Count == 0)
             {
-                openSpawnPoint = firstSpawnPoint;
+                openSpawnPosition = firstSpawnPoint;
             }
             else
             {
                 var currentPlayer = Runner.ActivePlayers.First();
                 PlayerSpawnPointPlacement.TryGet(currentPlayer, out var spawnPoint);
-                openSpawnPoint = spawnPoint == firstSpawnPoint ? secondSpawnPoint : firstSpawnPoint;
+                openSpawnPosition = spawnPoint.position == firstSpawnPoint.position ? secondSpawnPoint : firstSpawnPoint;
             }
             
             if (Runner.ActivePlayers.Count() == 1)
@@ -56,9 +78,9 @@ namespace Snowballers.Network
             
             if (!PlayerSpawnPointPlacement.ContainsKey(player))
             {
-                PlayerSpawnPointPlacement.Add(player, openSpawnPoint);
-                networkPlayerHealth.NoHealthLeft += RespawnPlayers;
-                SpawnPlayer(player, openSpawnPoint);
+                PlayerSpawnPointPlacement.Add(player, openSpawnPosition);
+                networkPlayerHealth.NoHealthLeftCallback += RespawnPlayers;
+                SpawnPlayer(player, openSpawnPosition);
             }
         }
 
@@ -68,7 +90,7 @@ namespace Snowballers.Network
             {
                 var networkRig = NetworkUtils.GetPlayerRigFromRef(Runner, player);
                 var networkPlayerHealth = networkRig.GetComponentInChildren<NetworkHealth>();
-                networkPlayerHealth.NoHealthLeft -= RespawnPlayers;
+                networkPlayerHealth.NoHealthLeftCallback -= RespawnPlayers;
 
                 PlayerSpawnPointPlacement.Remove(player);
             }
@@ -82,7 +104,7 @@ namespace Snowballers.Network
             }
         }
 
-        private void SpawnPlayer(PlayerRef playerRef, NetworkTransform spawnTransform)
+        private void SpawnPlayer(PlayerRef playerRef, SpawnPoint spawnPoint)
         {
             if (Runner.LocalPlayer != playerRef)
             {
@@ -90,7 +112,7 @@ namespace Snowballers.Network
             }
 
             var localPlayer = FindFirstObjectByType<Player>();
-            localPlayer.TeleportAsync(spawnTransform.transform.position, spawnTransform.transform.rotation).Forget();
+            localPlayer.TeleportAsync(spawnPoint.position, spawnPoint.rotation).Forget();
         }
     }
 }
