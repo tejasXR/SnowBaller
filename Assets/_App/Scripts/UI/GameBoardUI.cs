@@ -1,18 +1,20 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Fusion;
 using Snowballers.Network;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
-namespace Snowballers
+namespace Snowballers.UI
 {
     public class GameBoardUI : MonoBehaviour
     {
         [SerializeField] private NetworkGameBoard networkGameBoard;
         [SerializeField] private RectTransform playerScoreContainer;
         [SerializeField] private PlayerScoreUI playerScoreUiPrefab;
+        [SerializeField] private Image localPlayerOutline;
+        [SerializeField] private GameObject winnerContainer;
         [SerializeField] private TextMeshProUGUI winnerTmp;
 
         private readonly Dictionary<PlayerRef, PlayerScoreUI> _playerScoreUis = new Dictionary<PlayerRef, PlayerScoreUI>();
@@ -23,6 +25,11 @@ namespace Snowballers
             networkGameBoard.PlayerLeftCallback += OnPlayerLeft;
             networkGameBoard.PlayerScoresChangedCallback += OnPlayerScoresChanged;
             networkGameBoard.WinnerDeterminedCallback += OnWinnerDetermined;
+        }
+
+        private void Start()
+        {
+            winnerContainer.SetActive(false);
         }
 
         private void OnDestroy()
@@ -37,6 +44,8 @@ namespace Snowballers
             var playerScore = Instantiate(playerScoreUiPrefab, playerScoreContainer);
             playerScore.Setup(playerRef, isLocal);
             playerScore.SetScore(0);
+
+            localPlayerOutline.enabled = isLocal;
             
             _playerScoreUis.Add(playerRef, playerScore);
         }
@@ -56,13 +65,13 @@ namespace Snowballers
                 if (playerScoreDictionary.TryGetValue(kvp.Key, out var networkPlayerScore))
                 {
                     kvp.Value.SetScore(networkPlayerScore);
-                  
                 }
             }
         }
 
         private void OnWinnerDetermined(bool didLocalPlayerWin)
         {
+            winnerContainer.SetActive(true);
             var personString = didLocalPlayerWin ? "You won!!" : "You lost, but hopefully had fun!!";
             winnerTmp.text = personString;
         }
