@@ -121,7 +121,7 @@ GameObject:
   - component: {fileID: 1074147295243146613}
   - component: {fileID: 450419674144260260}
   - component: {fileID: 66212974349168893}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: LeftHand Controller
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -257,8 +257,7 @@ GameObject:
   - component: {fileID: 4723942103716881948}
   - component: {fileID: 1074147295606221672}
   - component: {fileID: 6155852953071332071}
-  - component: {fileID: 843055496585713622}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -367,19 +366,6 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 256
   playerHead: {fileID: 1074147296026158545}
---- !u!114 &843055496585713622
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1074147295606221589}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4b47fd604e6b27a40960b38f19cabc9b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  maxHealth: 3
 --- !u!1 &1074147295958783622
 GameObject:
   m_ObjectHideFlags: 0
@@ -391,7 +377,7 @@ GameObject:
   - component: {fileID: 1074147295958783623}
   - component: {fileID: 3209307706166830223}
   - component: {fileID: 8666928788707904640}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: RightHand Controller
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -531,7 +517,7 @@ GameObject:
   - component: {fileID: 7957011147925535687}
   - component: {fileID: 7611024771707163411}
   - component: {fileID: 1445010568451832283}
-  m_Layer: 8
+  m_Layer: 7
   m_Name: Main Camera
   m_TagString: MainCamera
   m_Icon: {fileID: 0}
@@ -823,7 +809,7 @@ GameObject:
   - component: {fileID: 1074147296098439420}
   - component: {fileID: 1074147296098439422}
   - component: {fileID: 1074147296098439421}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Left Hand Visual
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -909,7 +895,7 @@ GameObject:
   - component: {fileID: 1074147296294150592}
   - component: {fileID: 1074147296294150594}
   - component: {fileID: 1074147296294150593}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Right Hand Visual
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -993,7 +979,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4833518538655166958}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Original Fusion Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1027,7 +1013,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 885580867277427258}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Player Visuals
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1063,7 +1049,7 @@ GameObject:
   - component: {fileID: 5385417634652606339}
   - component: {fileID: 6030931097217545834}
   - component: {fileID: 1298284583984152393}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: XR Rig
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1151,7 +1137,7 @@ GameObject:
   - component: {fileID: 6030931097335155324}
   - component: {fileID: 6030931098110268909}
   - component: {fileID: 1670112276272977694}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: RightHand
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1361,7 +1347,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6030931097403683945}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Camera Offset
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1399,7 +1385,7 @@ GameObject:
   - component: {fileID: 6840906298174218731}
   - component: {fileID: 7627721029632950033}
   - component: {fileID: 8663780349761552605}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Main Camera
   m_TagString: MainCamera
   m_Icon: {fileID: 0}
@@ -1672,7 +1658,7 @@ GameObject:
   - component: {fileID: 6030931098242272014}
   - component: {fileID: 6030931098110268914}
   - component: {fileID: 1268434842781082690}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: LeftHand
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1883,7 +1869,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7627721028165446963}
   - component: {fileID: 7627721028165446960}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Collider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1937,7 +1923,7 @@ GameObject:
   - component: {fileID: 7627721028286923914}
   - component: {fileID: 7627721028286923913}
   - component: {fileID: 7627721028286923912}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: FaderTarget
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2021,7 +2007,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7627721028778216049}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: BeamOrigin
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2053,7 +2039,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7627721029270412687}
   - component: {fileID: 7627721029270412684}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Collider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2105,7 +2091,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7627721029858681416}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: BeamOrigin
   m_TagString: Untagged
   m_Icon: {fileID: 0}
