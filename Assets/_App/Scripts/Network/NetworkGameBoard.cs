@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Fusion;
-using Photon.Realtime;
 using UnityEngine;
 
 namespace Snowballers.Network
@@ -12,7 +11,10 @@ namespace Snowballers.Network
         public event Action<PlayerRef, bool> PlayerJoinedCallback;
         public event Action<PlayerRef, bool> PlayerLeftCallback;
         public event Action<Dictionary<PlayerRef, int>> PlayerScoresChangedCallback;
+        public event Action<bool> WinnerDeterminedCallback; 
 
+        public int WinningGameScore => 3;
+        
         [SerializeField] private NetworkPlayerManager networkPlayerManager;
 
         [Networked] private NetworkDictionary<PlayerRef, Int32> PlayerScores { get; }
@@ -88,10 +90,24 @@ namespace Snowballers.Network
                 // When a player dies, give the other player a score
                 if (kvp.Key != playerRef)
                 {
-                    PlayerScores.Set(kvp.Key, kvp.Value + 1);
+                    PlayerScoresChangedRpc(kvp.Key, kvp.Value + 1);
                 }
             }
+        }
 
+        [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+        private void PlayerScoresChangedRpc(PlayerRef playerRef, Int32 score)
+        {
+            if (PlayerScores.ContainsKey(playerRef))
+            {
+                PlayerScores.Set(playerRef, score);
+                if (score >= WinningGameScore)
+                {
+                    var didLocalPlayerWin = playerRef == Runner.LocalPlayer;
+                    WinnerDeterminedCallback?.Invoke(didLocalPlayerWin);
+                }
+            }
+                
             var dictionaryParse = PlayerScores.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
             PlayerScoresChangedCallback?.Invoke(dictionaryParse);
         }
