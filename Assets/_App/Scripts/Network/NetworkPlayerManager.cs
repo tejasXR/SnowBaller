@@ -9,6 +9,8 @@ namespace Snowballers.Network
         public event Action<PlayerRef, NetworkPlayer> PlayerJoinedCallback;
         public event Action<PlayerRef, NetworkPlayer> PlayerLeftCallback;
 
+        public List<PlayerRef> PlayerRefs => _playerRefs;
+
         // Intentionally non-networked
         private readonly List<PlayerRef> _playerRefs = new List<PlayerRef>();
         
