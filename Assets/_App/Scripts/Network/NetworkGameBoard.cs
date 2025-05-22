@@ -17,7 +17,8 @@ namespace Snowballers.Network
         
         [SerializeField] private NetworkPlayerManager networkPlayerManager;
 
-        [Networked] private NetworkDictionary<PlayerRef, Int32> PlayerScores { get; }
+        [Networked, OnChangedRender(nameof(OnRemotePlayerScoresChanged))]
+        private NetworkDictionary<PlayerRef, Int32> PlayerScores { get; }
 
         public override void Spawned()
         {
@@ -32,6 +33,8 @@ namespace Snowballers.Network
 
             networkPlayerManager.PlayerJoinedCallback += PlayerJoined;
             networkPlayerManager.PlayerLeftCallback += PlayerLeft;
+
+            PlayerScoresChangedCallback += CheckWinner;
         }
 
         public override void Despawned(NetworkRunner runner, bool hasState)
@@ -101,15 +104,26 @@ namespace Snowballers.Network
             if (PlayerScores.ContainsKey(playerRef))
             {
                 PlayerScores.Set(playerRef, score);
-                if (score >= WinningGameScore)
+            }
+        }
+
+        private void OnRemotePlayerScoresChanged()
+        {
+            var dictionaryParse = PlayerScores.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+            PlayerScoresChangedCallback?.Invoke(dictionaryParse);
+        }
+
+        private void CheckWinner(Dictionary<PlayerRef, int> dictionary)
+        {
+            foreach (var kvp in dictionary)
+            {
+                var playerScore = kvp.Value;
+                if (playerScore >= WinningGameScore)
                 {
-                    var didLocalPlayerWin = playerRef == Runner.LocalPlayer;
+                    var didLocalPlayerWin = kvp.Key == Runner.LocalPlayer;
                     WinnerDeterminedCallback?.Invoke(didLocalPlayerWin);
                 }
             }
-                
-            var dictionaryParse = PlayerScores.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-            PlayerScoresChangedCallback?.Invoke(dictionaryParse);
         }
     }
 }
