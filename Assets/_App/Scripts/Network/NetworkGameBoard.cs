@@ -19,7 +19,7 @@ namespace Snowballers.Network
 
         public override void Spawned()
         {
-            foreach (var playerRef in Runner.ActivePlayers)
+            foreach (var playerRef in networkPlayerManager.PlayerRefs)
             {
                 var playerRig = NetworkUtils.GetPlayerRigFromRef(Runner, playerRef);
                 if (playerRig)
@@ -57,7 +57,7 @@ namespace Snowballers.Network
                 PlayerScores.Add(player, 0);
             }
             
-            networkPlayerHealth.NoHealthLeft += OnPlayerDied;
+            networkPlayerHealth.NoHealthLeftCallback += OnPlayerDied;
             var isLocal = Runner.LocalPlayer == player;
             PlayerJoinedCallback?.Invoke(player, isLocal);    
         }
@@ -68,7 +68,7 @@ namespace Snowballers.Network
             {
                 var networkRig = NetworkUtils.GetPlayerRigFromRef(Runner, player);
                 var networkPlayerHealth = networkRig.GetComponentInChildren<NetworkHealth>();
-                networkPlayerHealth.NoHealthLeft -= OnPlayerDied;
+                networkPlayerHealth.NoHealthLeftCallback -= OnPlayerDied;
 
                 if (PlayerScores.ContainsKey(player))
                 {
