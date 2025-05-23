@@ -467,7 +467,6 @@ MonoBehaviour:
   networkGameBoard: {fileID: 0}
   playerScoreContainer: {fileID: 4920242895550753794}
   playerScoreUiPrefab: {fileID: -6688769689574012009, guid: c6156aebfc11d604d99e7e97e54bf778, type: 3}
-  localPlayerOutline: {fileID: 8502310324189739235}
   winnerContainer: {fileID: 6001024965501792528}
   winnerTmp: {fileID: 3169056375595090608}
 --- !u!1 &7470765225161280124
@@ -610,7 +609,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: -2000, y: -2000}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8565937524824969381
 CanvasRenderer:

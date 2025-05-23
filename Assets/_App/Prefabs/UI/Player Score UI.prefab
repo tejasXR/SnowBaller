@@ -216,6 +216,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerNameTmp: {fileID: 1433379740608856811}
   playerScoreTmp: {fileID: 8402445573334654128}
+  localPlayerOutline: {fileID: 6822193911967040259}
 --- !u!1 &7145902874962917989
 GameObject:
   m_ObjectHideFlags: 0
@@ -230,7 +231,7 @@ GameObject:
   - component: {fileID: 6822193911967040259}
   - component: {fileID: 1320990187235228626}
   m_Layer: 0
-  m_Name: Background
+  m_Name: Outline
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
