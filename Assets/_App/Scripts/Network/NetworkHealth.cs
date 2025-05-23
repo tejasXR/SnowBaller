@@ -10,9 +10,11 @@ namespace Snowballers.Network
         public event Action<PlayerRef> NoHealthLeftCallback;
         
         [SerializeField] private float maxHealth = 2;
-        [SerializeField] private MeshRenderer meshRenderer;
+        [SerializeField] private Transform meshChildren;
         [SerializeField] private Color healthNormalColor;
         [SerializeField] private Color healthCriticalColor;
+
+        private MeshRenderer[] _meshRenderers;
         
         public float HealthPercentage => _currentHealthLocal / maxHealth;
         
@@ -28,6 +30,8 @@ namespace Snowballers.Network
         public override void Spawned()
         {
             _changeDetector = GetChangeDetector(ChangeDetector.Source.SimulationState);
+
+            _meshRenderers = meshChildren.GetComponentsInChildren<MeshRenderer>();
             
             ResetHealthRpc();
             HealthValueChangedCallback += OnPlayerHealthValueChanged;
@@ -70,7 +74,10 @@ namespace Snowballers.Network
 
         private void OnRemoteColorChanged()
         {
-            meshRenderer.material.color = NetworkedColor;
+            foreach (var meshRenderer in _meshRenderers)
+            {
+                meshRenderer.material.color = NetworkedColor;
+            }
         }
 
         private void ChangeLocalHealthValue(float healthValue)
