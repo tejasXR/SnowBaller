@@ -75,10 +75,7 @@ namespace Snowballers.Network
                 var networkPlayerHealth = networkRig.GetComponentInChildren<NetworkHealth>();
                 networkPlayerHealth.NoHealthLeftCallback -= OnPlayerDied;
 
-                if (PlayerScores.ContainsKey(player))
-                {
-                    PlayerScores.Remove(player);
-                }
+                PlayerScores.Remove(player);
                 
                 var isLocal = Runner.LocalPlayer == player;
                 PlayerLeftCallback?.Invoke(player, isLocal);
