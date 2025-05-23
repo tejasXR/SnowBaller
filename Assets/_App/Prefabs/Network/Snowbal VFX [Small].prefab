@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 6598115824799717868}
   - component: {fileID: 5479290994754941126}
   m_Layer: 0
-  m_Name: Snowbal VFX
+  m_Name: 'Snowbal VFX [Small]'
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

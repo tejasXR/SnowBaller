@@ -422,12 +422,21 @@ MonoBehaviour:
   customGravity: 550
   throwableCollider: {fileID: 6892009256337597773}
   distanceGrabCollider: {fileID: 2690739111848105997}
+  sfxAudioSource: {fileID: 5758164470952214756}
+  grabSfx: {fileID: 8300000, guid: 068bbdb0b63b3e04aa8815f93c32a781, type: 3}
+  throwSfx: {fileID: 8300000, guid: f0811e64b0fc44c45a0dab92a9762c3c, type: 3}
   _Damage: 2
   trailRenderer: {fileID: 9109558121274975328}
-  snowballDestroyVfx: {fileID: 5479290994754941126, guid: ecf54de1f1f0bba44a0413d452f2f6b0, type: 3}
+  snowballDestroyVfx: {fileID: 4945759954295297729, guid: 009b432aee60038428b9a5ed4bde2c8b, type: 3}
+  snowballDestroySfx: {fileID: 3866898246351930071, guid: d98dfcfdda8668b4b93154cf06d386cd, type: 3}
 --- !u!4 &5497243108055608103 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3183593570733261954, guid: 248ba295785ac0c44a96b152ed8befa3, type: 3}
+  m_PrefabInstance: {fileID: 6945751322693496741}
+  m_PrefabAsset: {fileID: 0}
+--- !u!82 &5758164470952214756 stripped
+AudioSource:
+  m_CorrespondingSourceObject: {fileID: 3426491730499317569, guid: 248ba295785ac0c44a96b152ed8befa3, type: 3}
   m_PrefabInstance: {fileID: 6945751322693496741}
   m_PrefabAsset: {fileID: 0}
 --- !u!114 &6261360803999950175 stripped
