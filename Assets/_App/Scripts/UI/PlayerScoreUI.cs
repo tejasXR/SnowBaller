@@ -1,6 +1,7 @@
 using Fusion;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Snowballers
 {
@@ -8,6 +9,7 @@ namespace Snowballers
     {
         [SerializeField] private TextMeshProUGUI playerNameTmp;
         [SerializeField] private TextMeshProUGUI playerScoreTmp;
+        [SerializeField] private Image localPlayerOutline;
 
         public PlayerRef PlayerRef => _playerRef;
 
@@ -19,6 +21,7 @@ namespace Snowballers
             _playerRef = playerRef;
             _isLocal = isLocalPlayer;
             
+            localPlayerOutline.enabled = _isLocal;
             playerNameTmp.text = isLocalPlayer ? "You" : "Them";
         }
 

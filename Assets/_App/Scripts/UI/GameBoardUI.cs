@@ -13,7 +13,6 @@ namespace Snowballers.UI
         [SerializeField] private NetworkGameBoard networkGameBoard;
         [SerializeField] private RectTransform playerScoreContainer;
         [SerializeField] private PlayerScoreUI playerScoreUiPrefab;
-        [SerializeField] private Image localPlayerOutline;
         [SerializeField] private GameObject winnerContainer;
         [SerializeField] private TextMeshProUGUI winnerTmp;
 
@@ -44,18 +43,14 @@ namespace Snowballers.UI
             var playerScore = Instantiate(playerScoreUiPrefab, playerScoreContainer);
             playerScore.Setup(playerRef, isLocal);
             playerScore.SetScore(0);
-
-            localPlayerOutline.enabled = isLocal;
-            
             _playerScoreUis.Add(playerRef, playerScore);
         }
 
         private void OnPlayerLeft(PlayerRef playerRef, bool isLocal)
         {
-            foreach (var kvp in _playerScoreUis.Where(kvp => kvp.Key == playerRef))
-            {
-                _playerScoreUis.Remove(kvp.Key);
-            }
+            var playerScoreUi = _playerScoreUis[playerRef];
+            _playerScoreUis.Remove(playerRef);
+            Destroy(playerScoreUi);
         }
 
         private void OnPlayerScoresChanged(Dictionary<PlayerRef, int> playerScoreDictionary)
