@@ -25,6 +25,9 @@ namespace Snowballers.Network
         [SerializeField] private float customGravity = 400F;
         [Space] [SerializeField] private SphereCollider throwableCollider;
         [SerializeField] private SphereCollider distanceGrabCollider;
+        [Space] [SerializeField] private AudioSource sfxAudioSource;
+        [SerializeField] private AudioClip grabSfx;
+        [SerializeField] private AudioClip throwSfx;
 
         private CustomNetworkHandColliderGrabbable _grabbable;
         private bool _isGravityEnabled;
@@ -82,12 +85,14 @@ namespace Snowballers.Network
 
         private void OnDidGrab(CustomNetworkHandColliderGrabber grabber)
         {
+            sfxAudioSource.PlayOneShot(grabSfx);
             distanceGrabCollider.enabled = false;
             ThrowableGrabbedCallback?.Invoke();
         }
 
         private void OnDidUngrab()
         {
+            sfxAudioSource.PlayOneShot(throwSfx);
             SetThrownState();
         }
 
