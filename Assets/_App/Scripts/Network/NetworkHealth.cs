@@ -1,5 +1,6 @@
 using System;
 using Fusion;
+using Oculus.Haptics;
 using UnityEngine;
 
 namespace Snowballers.Network
@@ -13,6 +14,7 @@ namespace Snowballers.Network
         [SerializeField] private Transform meshChildren;
         [SerializeField] private Color healthNormalColor;
         [SerializeField] private Color healthCriticalColor;
+        [SerializeField] private HapticSource hitHaptics;
 
         private MeshRenderer[] _meshRenderers;
         
@@ -59,6 +61,7 @@ namespace Snowballers.Network
         {
             var color = Color.Lerp(healthCriticalColor, healthNormalColor, HealthPercentage);
             ChangeLocalColor(color);
+            hitHaptics.Play();
         }
 
         private void OnDead()
