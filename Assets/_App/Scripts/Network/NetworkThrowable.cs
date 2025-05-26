@@ -1,6 +1,8 @@
 using System;
 using Fusion;
 using Fusion.Addons.Physics;
+using Fusion.XR.Shared.Rig;
+using Oculus.Haptics;
 using UnityEngine;
 
 namespace Snowballers.Network
@@ -28,7 +30,11 @@ namespace Snowballers.Network
         [Space] [SerializeField] private AudioSource sfxAudioSource;
         [SerializeField] private AudioClip grabSfx;
         [SerializeField] private AudioClip throwSfx;
+        [Space] [SerializeField] private HapticSource hapticSource;
 
+        private const float GrabHapticForce = .4F; 
+        private const float ThrowHapticForce = .8F; 
+        
         private CustomNetworkHandColliderGrabbable _grabbable;
         private bool _isGravityEnabled;
         
@@ -87,12 +93,23 @@ namespace Snowballers.Network
         {
             sfxAudioSource.PlayOneShot(grabSfx);
             distanceGrabCollider.enabled = false;
+            
+            hapticSource.controller = grabber.hand.side == RigPart.LeftController ? Controller.Left : Controller.Right;
+            hapticSource.amplitude = GrabHapticForce;
+            hapticSource.Play();
+            
             ThrowableGrabbedCallback?.Invoke();
         }
 
         private void OnDidUngrab()
         {
+            var grabber = Grabbable.CurrentGrabber;
+            hapticSource.controller = grabber.hand.side == RigPart.LeftController ? Controller.Left : Controller.Right;
+            hapticSource.amplitude = ThrowHapticForce;
+            hapticSource.Play();
+            
             sfxAudioSource.PlayOneShot(throwSfx);
+
             SetThrownState();
         }
 
@@ -109,6 +126,7 @@ namespace Snowballers.Network
 
         public void SetThrownState()
         {
+
             _isGravityEnabled = true;
             distanceGrabCollider.enabled = false;
             throwableCollider.isTrigger = false;
@@ -129,7 +147,7 @@ namespace Snowballers.Network
             ThrowableThrownCallback?.Invoke();
         }
 
-        public void Destroy()
+        protected void Destroy()
         {
             ThrowableDestroyedCallback?.Invoke();
             Runner.Despawn(Object);

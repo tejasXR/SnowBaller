@@ -366,6 +366,17 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 4966388270530772614}
   m_SourcePrefab: {fileID: 100100000, guid: 248ba295785ac0c44a96b152ed8befa3, type: 3}
+--- !u!114 &1065674079214605409 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7975396561628036036, guid: 248ba295785ac0c44a96b152ed8befa3, type: 3}
+  m_PrefabInstance: {fileID: 6945751322693496741}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b9dc93c7e1ae142448d4a122be86ea8d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!135 &2690739111848105997 stripped
 SphereCollider:
   m_CorrespondingSourceObject: {fileID: 4986374225023252392, guid: 248ba295785ac0c44a96b152ed8befa3, type: 3}
@@ -399,6 +410,7 @@ MonoBehaviour:
   sfxAudioSource: {fileID: 5758164470952214756}
   grabSfx: {fileID: 8300000, guid: 068bbdb0b63b3e04aa8815f93c32a781, type: 3}
   throwSfx: {fileID: 8300000, guid: f0811e64b0fc44c45a0dab92a9762c3c, type: 3}
+  hapticSource: {fileID: 1065674079214605409}
   _Damage: 1
   trailRenderer: {fileID: 9109558121274975328}
   snowballDestroyVfx: {fileID: 5479290994754941126, guid: ecf54de1f1f0bba44a0413d452f2f6b0, type: 3}
