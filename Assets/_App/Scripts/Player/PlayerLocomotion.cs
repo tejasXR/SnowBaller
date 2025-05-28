@@ -1,4 +1,5 @@
 using System;
+using Oculus.Haptics;
 using UnityEngine;
 
 namespace Snowballers
@@ -9,7 +10,7 @@ namespace Snowballers
     [RequireComponent(typeof(Rigidbody))]
     public class PlayerLocomotion : MonoBehaviour
     {
-        [SerializeField] private bool disableMovement = false;
+        [SerializeField] private bool disableMovement = true;
         [SerializeField] private SlopeCalculation slopeCalculation;
         
         [Header("Colliders")]
@@ -25,6 +26,14 @@ namespace Snowballers
         [Header("Offsets")]
         [SerializeField] private Vector3 rightHandOffset;
         [SerializeField] private Vector3 leftHandOffset;
+
+        [Header("Haptics")] 
+        [SerializeField] private HapticSource leftHandHaptics;
+        [SerializeField] private HapticSource rightHandHaptics;
+
+        [Header("Audio")] 
+        [SerializeField] private float windSfxAmplifier;
+        [SerializeField] private AudioSource windSfx;
 
         private Vector3 LinearVelocity => _playerRigidBody.linearVelocity;
         
@@ -77,6 +86,10 @@ namespace Snowballers
             _lastRightHandPosition = rightHandFollower.transform.position;
             _lastHeadPosition = headCollider.transform.position;
             _lastPosition = transform.position;
+
+            // IMPORTANT: Disable movement on Awake
+            // Will re-enable movement once player manager registers networked player instance
+            disableMovement = true;
         }
 
         private void Update()
@@ -87,6 +100,7 @@ namespace Snowballers
             }
             
             RotateBodyCollider();
+            PlayWindSfx();
 
             Vector3 leftMovementProjection = Vector3.zero;
             Vector3 rightMovementProjection = Vector3.zero;
@@ -107,7 +121,15 @@ namespace Snowballers
                 
                 leftMovementProjection.y = Mathf.Clamp(leftMovementProjection.y, 0, maximumJumpVelocity);
                 leftMovementProjection.y *= jumpMultiplier;
+
+                leftHandHaptics.amplitude = leftMovementProjection.magnitude;
+                leftHandHaptics.Play();
             }
+            else
+            {
+                leftHandHaptics.Stop();
+            }
+            
             
             var rightMovementVector = _lastRightHandPosition - rightHandPosition;
             var rightMovementDirection = GetMovementVectorForHand(rightHandPosition, minimumRaycastDistance * defaultPrecision, rightMovementVector, OVRInput.Handedness.RightHanded);
@@ -122,9 +144,17 @@ namespace Snowballers
                 // Jump height
                 rightMovementProjection.y = Mathf.Clamp(rightMovementProjection.y, 0, maximumJumpVelocity);
                 rightMovementProjection.y *= jumpMultiplier;
+
+                rightHandHaptics.amplitude = rightMovementProjection.magnitude;
+                rightHandHaptics.Play();
             }
-            
-            Move(leftMovementProjection + rightMovementProjection + gravityForce);
+            else
+            {
+                rightHandHaptics.Stop();
+            }
+
+            var combinedVectorMovement = leftMovementProjection + rightMovementProjection + gravityForce;
+            Move(combinedVectorMovement);
 
             _lastLeftHandPosition = leftHandPosition;
             _lastRightHandPosition = rightHandPosition;
@@ -236,6 +266,14 @@ namespace Snowballers
             bodyCollider.transform.eulerAngles = new Vector3(0, headCollider.transform.eulerAngles.y, 0);
         }
 
-    
+        private void PlayWindSfx()
+        {
+            if (!windSfx.isPlaying)
+            {
+                windSfx.Play();
+            }
+            
+            windSfx.volume = windSfxAmplifier * _playerRigidBody.linearVelocity.magnitude;
+        }
     }
 }
