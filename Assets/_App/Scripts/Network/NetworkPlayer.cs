@@ -31,6 +31,9 @@ namespace Snowballers.Network
             {
                 bodyCollider.enabled = false;
             }
+
+            var localPlayerLocomotion = FindAnyObjectByType<PlayerLocomotion>(FindObjectsInactive.Include);
+            localPlayerLocomotion.ToggleMovement(true);
             
             _networkPlayerManager.RegisterPlayer(player);
         }
