@@ -16,20 +16,27 @@ namespace Snowballers.Network
     public class NetworkPlayerSpawner : NetworkBehaviour
     {
         [SerializeField] private NetworkPlayerManager networkPlayerManager;
+        [SerializeField] private NetworkGameStarter networkGameStarter;
         [SerializeField] private NetworkTransform[] spawnPointTransforms;
         
-        [Networked] private NetworkDictionary<PlayerRef, SpawnPoint> PlayerSpawnPointPlacement { get; }
+        // [Networked] private NetworkDictionary<PlayerRef, SpawnPoint> PlayerSpawnPointPlacement { get; }
+
+        private SpawnPoint _spawnPoint;
 
         public override void Spawned()
         {
             networkPlayerManager.PlayerJoinedCallback += PlayerJoined;
             networkPlayerManager.PlayerLeftCallback += PlayerLeft;
+
+            networkGameStarter.GameStartedCallback += OnGameStarted;
         }
 
         public override void Despawned(NetworkRunner runner, bool hasState)
         {
             networkPlayerManager.PlayerJoinedCallback -= PlayerJoined;
             networkPlayerManager.PlayerLeftCallback -= PlayerLeft;
+            
+            networkGameStarter.GameStartedCallback -= OnGameStarted;
         }
 
         private void PlayerJoined(PlayerRef player, NetworkPlayer networkPlayer)
@@ -59,49 +66,57 @@ namespace Snowballers.Network
                 rotation = spawnPointTransforms[1].transform.rotation
             };
             
-            if (PlayerSpawnPointPlacement.Count == 0)
+            if (Runner.ActivePlayers.Count() == 1)
             {
-                openSpawnPosition = firstSpawnPoint;
+                _spawnPoint = firstSpawnPoint;
             }
             else
             {
-                var currentPlayer = Runner.ActivePlayers.First();
-                PlayerSpawnPointPlacement.TryGet(currentPlayer, out var spawnPoint);
-                openSpawnPosition = spawnPoint.position == firstSpawnPoint.position ? secondSpawnPoint : firstSpawnPoint;
+                // var currentPlayer = Runner.ActivePlayers.First();
+                // PlayerSpawnPointPlacement.TryGet(currentPlayer, out var spawnPoint);
+                // openSpawnPosition = spawnPoint.position == firstSpawnPoint.position ? secondSpawnPoint : firstSpawnPoint;
+                
+                // TEJAS: This introduces an intentional bug if one player leaves and rejoins!
+                // Okay for now!
+                _spawnPoint = secondSpawnPoint;
             }
             
-            if (Runner.ActivePlayers.Count() == 1)
+            /*if (Runner.ActivePlayers.Count() == 1)
             {
                 // Clear values from memory if we are the first player joining
                 PlayerSpawnPointPlacement.Clear();
-            }
+            }*/
             
-            if (!PlayerSpawnPointPlacement.ContainsKey(player))
+            /*if (!PlayerSpawnPointPlacement.ContainsKey(player))
             {
                 PlayerSpawnPointPlacement.Add(player, openSpawnPosition);
                 networkPlayerHealth.NoHealthLeftCallback += RespawnPlayers;
                 SpawnPlayer(player, openSpawnPosition);
-            }
+            }*/
+            
+            SpawnPlayer(player, _spawnPoint);
         }
 
         private void PlayerLeft(PlayerRef player, NetworkPlayer networkPlayer)
         {
-            if (PlayerSpawnPointPlacement.ContainsKey(player))
+            /*if (PlayerSpawnPointPlacement.ContainsKey(player))
             {
                 var networkRig = NetworkUtils.GetPlayerRigFromRef(Runner, player);
                 var networkPlayerHealth = networkRig.GetComponentInChildren<NetworkHealth>();
                 networkPlayerHealth.NoHealthLeftCallback -= RespawnPlayers;
 
                 PlayerSpawnPointPlacement.Remove(player);
-            }
+            }*/
         }
 
-        private void RespawnPlayers(PlayerRef _)
+        private void OnGameStarted()
         {
-            foreach (var kvp in PlayerSpawnPointPlacement)
+            /*foreach (var kvp in PlayerSpawnPointPlacement)
             {
                 SpawnPlayer(kvp.Key, kvp.Value);
-            }
+            }*/
+            
+            SpawnPlayer(Runner.LocalPlayer, _spawnPoint);
         }
 
         private void SpawnPlayer(PlayerRef playerRef, SpawnPoint spawnPoint)
