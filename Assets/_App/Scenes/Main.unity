@@ -5236,30 +5236,6 @@ PrefabInstance:
       propertyPath: networkGameStarter
       value: 
       objectReference: {fileID: 2072876378}
-    - target: {fileID: 6805921082309782490, guid: e1ee389cd4451234baf4de1c981cb07a, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6805921082309782490, guid: e1ee389cd4451234baf4de1c981cb07a, type: 3}
-      propertyPath: m_AnchorMin.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6805921082309782490, guid: e1ee389cd4451234baf4de1c981cb07a, type: 3}
-      propertyPath: m_SizeDelta.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6805921082309782490, guid: e1ee389cd4451234baf4de1c981cb07a, type: 3}
-      propertyPath: m_SizeDelta.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6805921082309782490, guid: e1ee389cd4451234baf4de1c981cb07a, type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6805921082309782490, guid: e1ee389cd4451234baf4de1c981cb07a, type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 7116167567919012857, guid: e1ee389cd4451234baf4de1c981cb07a, type: 3}
       propertyPath: m_LocalPosition.x
       value: -20.98
