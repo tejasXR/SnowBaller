@@ -11,6 +11,7 @@ namespace Snowballers.Network
         public event Action<PlayerRef, bool> PlayerJoinedCallback;
         public event Action<PlayerRef, bool> PlayerLeftCallback;
         public event Action<Dictionary<PlayerRef, int>> PlayerScoresChangedCallback;
+        public event Action LocalPlayerScoredCallback;
         public event Action<bool> WinnerDeterminedCallback; 
 
         public int WinningGameScore => 3;
