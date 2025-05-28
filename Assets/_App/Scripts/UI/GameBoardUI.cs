@@ -11,10 +11,12 @@ namespace Snowballers.UI
     public class GameBoardUI : MonoBehaviour
     {
         [SerializeField] private NetworkGameBoard networkGameBoard;
+        [SerializeField] private NetworkGameStarter networkGameStarter;
         [SerializeField] private RectTransform playerScoreContainer;
         [SerializeField] private PlayerScoreUI playerScoreUiPrefab;
         [SerializeField] private GameObject winnerContainer;
         [SerializeField] private TextMeshProUGUI winnerTmp;
+        [SerializeField] private AudioSource winnerAudioSource;
 
         private readonly Dictionary<PlayerRef, PlayerScoreUI> _playerScoreUis = new Dictionary<PlayerRef, PlayerScoreUI>();
         
@@ -24,6 +26,8 @@ namespace Snowballers.UI
             networkGameBoard.PlayerLeftCallback += OnPlayerLeft;
             networkGameBoard.PlayerScoresChangedCallback += OnPlayerScoresChanged;
             networkGameBoard.WinnerDeterminedCallback += OnWinnerDetermined;
+
+            networkGameStarter.GameStartedCallback += OnGameStarted;
         }
 
         private void Start()
@@ -36,6 +40,8 @@ namespace Snowballers.UI
             networkGameBoard.PlayerJoinedCallback -= OnPlayerJoined;
             networkGameBoard.PlayerLeftCallback -= OnPlayerLeft;
             networkGameBoard.PlayerScoresChangedCallback -= OnPlayerScoresChanged;
+            
+            networkGameStarter.GameStartedCallback -= OnGameStarted;
         }
 
         private void OnPlayerJoined(PlayerRef playerRef, bool isLocal)
@@ -69,6 +75,13 @@ namespace Snowballers.UI
             winnerContainer.SetActive(true);
             var personString = didLocalPlayerWin ? "You won!!" : "You lost, but hopefully had fun!!";
             winnerTmp.text = personString;
+            
+            winnerAudioSource.Play();
+        }
+
+        private void OnGameStarted()
+        {
+            winnerContainer.SetActive(false);
         }
     }
 }
