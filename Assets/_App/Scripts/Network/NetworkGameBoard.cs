@@ -14,7 +14,8 @@ namespace Snowballers.Network
         public event Action<bool> WinnerDeterminedCallback; 
 
         public int WinningGameScore => 3;
-        
+
+        [SerializeField] private NetworkGameStarter networkGameStarter;
         [SerializeField] private NetworkPlayerManager networkPlayerManager;
 
         [Networked, OnChangedRender(nameof(OnRemotePlayerScoresChanged))]
@@ -33,6 +34,7 @@ namespace Snowballers.Network
 
             networkPlayerManager.PlayerJoinedCallback += PlayerJoined;
             networkPlayerManager.PlayerLeftCallback += PlayerLeft;
+            networkGameStarter.GameStartedCallback += OnGameStarted;
 
             PlayerScoresChangedCallback += CheckWinner;
         }
@@ -41,6 +43,8 @@ namespace Snowballers.Network
         {
             networkPlayerManager.PlayerJoinedCallback -= PlayerJoined;
             networkPlayerManager.PlayerLeftCallback -= PlayerLeft;
+            
+            networkGameStarter.GameStartedCallback -= OnGameStarted;
         }
 
         private void PlayerJoined(PlayerRef player, NetworkPlayer networkPlayer)
@@ -120,6 +124,14 @@ namespace Snowballers.Network
                     var didLocalPlayerWin = kvp.Key == Runner.LocalPlayer;
                     WinnerDeterminedCallback?.Invoke(didLocalPlayerWin);
                 }
+            }
+        }
+
+        private void OnGameStarted()
+        {
+            foreach (var kvp in PlayerScores)
+            {
+                PlayerScoresChangedRpc(kvp.Key, 0);
             }
         }
     }
