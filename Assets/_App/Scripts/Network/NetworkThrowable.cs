@@ -36,6 +36,8 @@ namespace Snowballers.Network
         private const float ThrowHapticForce = .8F; 
         
         private CustomNetworkHandColliderGrabbable _grabbable;
+        private CustomNetworkHandColliderGrabber _grabber;
+        
         private bool _isGravityEnabled;
         
         public override void Spawned()
@@ -93,8 +95,10 @@ namespace Snowballers.Network
         {
             sfxAudioSource.PlayOneShot(grabSfx);
             distanceGrabCollider.enabled = false;
+
+            _grabber = grabber;
             
-            hapticSource.controller = grabber.hand.side == RigPart.LeftController ? Controller.Left : Controller.Right;
+            hapticSource.controller = _grabber.hand.side == RigPart.LeftController ? Controller.Left : Controller.Right;
             hapticSource.amplitude = GrabHapticForce;
             hapticSource.Play();
             
@@ -103,12 +107,13 @@ namespace Snowballers.Network
 
         private void OnDidUngrab()
         {
-            var grabber = Grabbable.CurrentGrabber;
-            hapticSource.controller = grabber.hand.side == RigPart.LeftController ? Controller.Left : Controller.Right;
+            hapticSource.controller = _grabber.hand.side == RigPart.LeftController ? Controller.Left : Controller.Right;
             hapticSource.amplitude = ThrowHapticForce;
             hapticSource.Play();
             
             sfxAudioSource.PlayOneShot(throwSfx);
+
+            _grabber = null;
 
             SetThrownState();
         }
@@ -126,7 +131,6 @@ namespace Snowballers.Network
 
         public void SetThrownState()
         {
-
             _isGravityEnabled = true;
             distanceGrabCollider.enabled = false;
             throwableCollider.isTrigger = false;
