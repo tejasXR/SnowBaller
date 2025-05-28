@@ -471,7 +471,10 @@ MonoBehaviour:
   playerScoreUiPrefab: {fileID: -6688769689574012009, guid: c6156aebfc11d604d99e7e97e54bf778, type: 3}
   winnerContainer: {fileID: 6001024965501792528}
   winnerTmp: {fileID: 3169056375595090608}
-  winnerAudioSource: {fileID: 5206160619234409188}
+  audioSource: {fileID: 5206160619234409188}
+  winnerSfxClip: {fileID: 8300000, guid: 22b15959bf6c6394197999e3a69af823, type: 3}
+  loserSfxClip: {fileID: 8300000, guid: e3fb6cac2a9a4df41929251d20ae9a67, type: 3}
+  pointSfxClip: {fileID: 8300000, guid: c61ccd57d9b312944993ca065146203b, type: 3}
 --- !u!1 &7470765225161280124
 GameObject:
   m_ObjectHideFlags: 0
@@ -724,7 +727,7 @@ GameObject:
   - component: {fileID: 8754073870607850895}
   - component: {fileID: 5206160619234409188}
   m_Layer: 0
-  m_Name: Winner Audio Source
+  m_Name: Audio Source
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

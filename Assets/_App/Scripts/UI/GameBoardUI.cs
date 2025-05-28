@@ -16,7 +16,10 @@ namespace Snowballers.UI
         [SerializeField] private PlayerScoreUI playerScoreUiPrefab;
         [SerializeField] private GameObject winnerContainer;
         [SerializeField] private TextMeshProUGUI winnerTmp;
-        [SerializeField] private AudioSource winnerAudioSource;
+        [SerializeField] private AudioSource audioSource;
+        [SerializeField] private AudioClip winnerSfxClip;
+        [SerializeField] private AudioClip loserSfxClip;
+        [SerializeField] private AudioClip pointSfxClip;
 
         private readonly Dictionary<PlayerRef, PlayerScoreUI> _playerScoreUis = new Dictionary<PlayerRef, PlayerScoreUI>();
         
@@ -68,15 +71,19 @@ namespace Snowballers.UI
                     kvp.Value.SetScore(networkPlayerScore);
                 }
             }
+            
+            audioSource.PlayOneShot(pointSfxClip);
         }
 
         private void OnWinnerDetermined(bool didLocalPlayerWin)
         {
             winnerContainer.SetActive(true);
+            
             var personString = didLocalPlayerWin ? "You won!!" : "You lost, but hopefully had fun!!";
             winnerTmp.text = personString;
-            
-            winnerAudioSource.Play();
+
+            var clipToPlay = didLocalPlayerWin ? winnerSfxClip : loserSfxClip;
+            audioSource.PlayOneShot(clipToPlay);
         }
 
         private void OnGameStarted()
